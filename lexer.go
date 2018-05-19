@@ -133,36 +133,56 @@ func (l *lexer) Next() Token {
 	return nil
 }
 
-func (l *lexer) peek() rune {
-	if l.pos >= l.len {
-		return eof
+func (l *lexer) nextNum() Token {
+	if l.test("0b") {
+		l.expect("0b")
+		l.readWhile(isBin)
+	} else if l.test("0x") {
+		l.expect("0x")
+		l.readWhile(isHex)
+	} else {
+		l.readWhile(isDec)
 	}
-	return l.input[l.pos]
+	return l.token(NUM)
 }
 
-func (l *lexer) peeks(s string) bool {
-	rs := []rune(s)
-	for i, r := range rs {
-		p := l.pos + i
-		if p >= l.len || r != l.input[p] {
-			return false
-		}
+// Symbols may not contain any decimal digits.
+func (l *lexer) nextSymbol() Token {
+	l.readWhile(isSym)
+	return l.token(SYM)
+}
+
+// peek at the next character in the input stream. Will not consume the
+// character.
+func (l *lexer) peek() rune {
+	if l.pos < l.len {
+		return l.input[l.pos]
 	}
-	return true
+	return eof
 }
 
 func (l *lexer) read() rune {
 	c := l.peek()
-	if c != eof {
-		if c == '\n' {
-			l.line++
-			l.col = 1
-		} else {
-			l.col++
-		}
-		l.val = append(l.val, c)
-		l.pos++
+	// if c != eof {
+	// 	if c == '\n' {
+	// 		l.line++
+	// 		l.col = 1
+	// 	} else {
+	// 		l.col++
+	// 	}
+	// 	l.val = append(l.val, c)
+	// 	l.pos++
+	// }
+	if c == eof {
+		return eof
+	} else if c == '\n' {
+		l.line++
+		l.col = 1
+	} else {
+		l.col++
 	}
+	l.val = append(l.val, c)
+	l.pos++
 	return c
 }
 
@@ -174,14 +194,40 @@ func (l *lexer) readWhile(pred func(rune) bool) {
 	}
 }
 
-func (l *lexer) expect(s string) {
-	rs := []rune(s)
-	for _, r := range rs {
-		l.val = append(l.val, r)
+// test compares the next characters with the string s and returns true iff
+// the input matches s. It does not consume any characters in this process.
+func (l *lexer) test(s string) bool {
+	for i, c := range s {
+		p := l.pos + i
+		if p >= l.len || rune(c) != l.input[p] {
+			return false
+		}
 	}
-	l.pos += len(s)
+	return true
 }
 
+// expect compares the next characters with the string s and will consume any
+// matching character up until the first mismatch if any. A mismatch will prompt
+// an error message. Subsequent potentially matching characters will not be
+// consumed.
+// for _, c := range s {
+// 	l.val = append(l.val, rune(c))
+// }
+// l.pos += len(s)
+func (l *lexer) expect(s string) {
+	for _, c := range s {
+		r := l.peek()
+		if r == rune(c) {
+			l.read()
+		} else {
+			// Print Error.
+			return
+		}
+	}
+}
+
+// token returns a new Token of a certain type coalescing the lexer's gathered
+// scanning state.
 func (l *lexer) token(kind Kind) Token {
 	return NewToken(kind, string(l.val), NewPos(l.line, l.col))
 }
@@ -213,23 +259,4 @@ func isSym(c rune) bool {
 	return unicode.IsPrint(c) &&
 		strings.ContainsRune(" \t\r\n0123456789()", c) == false
 	//return (isWhitespace(c) || isDec(c) || c == '(' || c == ')') == false
-}
-
-func (l *lexer) nextNum() Token {
-	if l.peeks("0b") {
-		l.expect("0b")
-		l.readWhile(isBin)
-	} else if l.peeks("0x") {
-		l.expect("0x")
-		l.readWhile(isHex)
-	} else {
-		l.readWhile(isDec)
-	}
-	return l.token(NUM)
-}
-
-// Symbols may not contain any decimal digits.
-func (l *lexer) nextSymbol() Token {
-	l.readWhile(isSym)
-	return l.token(SYM)
 }
