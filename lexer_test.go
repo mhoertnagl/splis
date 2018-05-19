@@ -57,3 +57,25 @@ func TestLexSExrp(t *testing.T) {
 	assert(t, l.Next(), NewToken(SYM, "b", NewPos(1, 6)))
 	assert(t, l.Next(), NewToken(PAR, ")", NewPos(1, 7)))
 }
+
+func TestLexComplexSExrp(t *testing.T) {
+	l := NewLexer(`
+		(if (> a 0)
+			(+ a 1)
+			0)
+	`)
+	assert(t, l.Next(), NewToken(PAR, "(", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(SYM, "if", NewPos(1, 2)))
+	assert(t, l.Next(), NewToken(PAR, "(", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(SYM, ">", NewPos(1, 4)))
+	assert(t, l.Next(), NewToken(SYM, "a", NewPos(1, 6)))
+	assert(t, l.Next(), NewToken(NUM, "0", NewPos(1, 7)))
+	assert(t, l.Next(), NewToken(PAR, ")", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(PAR, "(", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(SYM, "+", NewPos(1, 4)))
+	assert(t, l.Next(), NewToken(SYM, "a", NewPos(1, 6)))
+	assert(t, l.Next(), NewToken(NUM, "1", NewPos(1, 7)))
+	assert(t, l.Next(), NewToken(PAR, ")", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(NUM, "0", NewPos(1, 7)))
+	assert(t, l.Next(), NewToken(PAR, ")", NewPos(1, 1)))
+}

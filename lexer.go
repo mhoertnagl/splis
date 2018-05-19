@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"unicode"
 )
 
 type Kind int
@@ -94,6 +95,7 @@ type lexer struct {
 	len   int
 }
 
+// NewLexer creates a new Lexer.
 func NewLexer(input string) Lexer {
 	rs := []rune(input)
 	return &lexer{0, 1, 1, nil, rs, len(rs)}
@@ -137,10 +139,6 @@ func (l *lexer) peek() rune {
 	}
 	return l.input[l.pos]
 }
-
-// func (l *lexer) peeks() []rune {
-
-// }
 
 func (l *lexer) peeks(s string) bool {
 	rs := []rune(s)
@@ -188,24 +186,33 @@ func (l *lexer) token(kind Kind) Token {
 	return NewToken(kind, string(l.val), NewPos(l.line, l.col))
 }
 
+// isWhitespace returns true iff the rune is one of [ \t\r\n].
 func isWhitespace(c rune) bool {
-	return strings.ContainsRune(" \t\r", c)
+	return strings.ContainsRune(" \t\r\n", c)
 }
 
+// isDec returns true iff the rune is a decimal digit.
 func isDec(c rune) bool {
 	return strings.ContainsRune("0123456789", c)
 }
 
+// isDec returns true iff the rune is either '0' or '1'.
 func isBin(c rune) bool {
 	return strings.ContainsRune("01", c)
 }
 
+// isHex returns true iff the rune is a hexadecimal digit. Note however, that
+// the lower-case hexadecimal digits [a-f] are not supported.
 func isHex(c rune) bool {
 	return strings.ContainsRune("0123456789ABCDEF", c)
 }
 
+// isSym returns true iff the rune is printable as defined in unicode.IsPrint
+// and is not a whitespace character a decimal digit, '(' or ')'.
 func isSym(c rune) bool {
-	return (isWhitespace(c) || isDec(c) || c == '(' || c == ')') == false
+	return unicode.IsPrint(c) &&
+		strings.ContainsRune(" \t\r\n0123456789()", c) == false
+	//return (isWhitespace(c) || isDec(c) || c == '(' || c == ')') == false
 }
 
 func (l *lexer) nextNum() Token {
@@ -221,6 +228,7 @@ func (l *lexer) nextNum() Token {
 	return l.token(NUM)
 }
 
+// Symbols may not contain any decimal digits.
 func (l *lexer) nextSymbol() Token {
 	l.readWhile(isSym)
 	return l.token(SYM)
