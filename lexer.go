@@ -6,18 +6,27 @@ import (
 	"unicode"
 )
 
+// Kind specifies the type of token returned.
 type Kind int
 
+// eof is the End Of File character rune.
 const eof = rune(0)
 
 const (
+	// PAR are parentehsis tokens.
 	PAR Kind = iota
+	// NUM are numeric tokens.
 	NUM
+	// SYM is any character that is not a whitespace, a number or a parenthesis.
 	SYM
+	// EOF is the End Of File token.
 	EOF
+	// ERR indicates an error token.
 	ERR
 )
 
+// Pos indicates the line number and character starting position of the token
+// within the input string.
 type Pos interface {
 	Line() int
 	Col() int
@@ -28,6 +37,7 @@ type pos struct {
 	col  int
 }
 
+// NewPos returns a new token position.
 func NewPos(line int, col int) Pos {
 	return &pos{line, col}
 }
@@ -44,6 +54,7 @@ func (p *pos) String() string {
 	return fmt.Sprintf("[%d:%d]", p.line, p.col)
 }
 
+// Token is the basic block of any scanned input.
 type Token interface {
 	Kind() Kind
 	Value() string
@@ -56,6 +67,7 @@ type token struct {
 	pos  Pos
 }
 
+// NewToken return a new token.
 func NewToken(kind Kind, val string, pos Pos) Token {
 	return &token{kind, val, pos}
 }
@@ -76,13 +88,10 @@ func (t *token) String() string {
 	return fmt.Sprintf("%d [%s] @ %s", t.kind, t.val, t.pos)
 }
 
-// Lexer scans the input text for tokens.
+// Lexer turns a stream of characters into a stream of tokens.
 type Lexer interface {
 
-	// Peek returns the next lexer token but does not consume it.
-	Peek() Token
-
-	// Next returns and consumes the next lexer token.
+	// Next consumes and returns the next lexer token.
 	Next() Token
 }
 
@@ -101,15 +110,7 @@ func NewLexer(input string) Lexer {
 	return &lexer{0, 1, 1, nil, rs, len(rs)}
 }
 
-// func NewLexer(input []rune) Lexer {
-// 	return &lexer{0, 1, 1, input}
-// }
-
-func (l *lexer) Peek() Token {
-	//t := l.Next()
-	return nil
-}
-
+// Next consumes and returns the next lexer token.
 func (l *lexer) Next() Token {
 	l.val = []rune("")
 	c := l.peek()
@@ -133,6 +134,12 @@ func (l *lexer) Next() Token {
 	return nil
 }
 
+// nextNum accepts numbers of the following patterns:
+//  o \d+
+//  o 0b[01]+
+//  o 0x[0-9A-F]+
+// The returned token however does not contain the converted numeric value but
+// the scanned textual representation of the number.
 func (l *lexer) nextNum() Token {
 	if l.test("0b") {
 		l.expect("0b")
@@ -146,7 +153,7 @@ func (l *lexer) nextNum() Token {
 	return l.token(NUM)
 }
 
-// Symbols may not contain any decimal digits.
+// NOTE: Symbols may not contain any decimal digits.
 func (l *lexer) nextSymbol() Token {
 	l.readWhile(isSym)
 	return l.token(SYM)
@@ -161,18 +168,9 @@ func (l *lexer) peek() rune {
 	return eof
 }
 
+// read peeks and consumes a single character from the input.
 func (l *lexer) read() rune {
 	c := l.peek()
-	// if c != eof {
-	// 	if c == '\n' {
-	// 		l.line++
-	// 		l.col = 1
-	// 	} else {
-	// 		l.col++
-	// 	}
-	// 	l.val = append(l.val, c)
-	// 	l.pos++
-	// }
 	if c == eof {
 		return eof
 	} else if c == '\n' {
@@ -186,6 +184,8 @@ func (l *lexer) read() rune {
 	return c
 }
 
+// readWhile consumes characters from the input as long as the predicate for
+// each character returns true.
 func (l *lexer) readWhile(pred func(rune) bool) {
 	c := l.peek()
 	for c != eof && pred(c) {
@@ -210,10 +210,6 @@ func (l *lexer) test(s string) bool {
 // matching character up until the first mismatch if any. A mismatch will prompt
 // an error message. Subsequent potentially matching characters will not be
 // consumed.
-// for _, c := range s {
-// 	l.val = append(l.val, rune(c))
-// }
-// l.pos += len(s)
 func (l *lexer) expect(s string) {
 	for _, c := range s {
 		r := l.peek()
@@ -229,7 +225,10 @@ func (l *lexer) expect(s string) {
 // token returns a new Token of a certain type coalescing the lexer's gathered
 // scanning state.
 func (l *lexer) token(kind Kind) Token {
-	return NewToken(kind, string(l.val), NewPos(l.line, l.col))
+	//return NewToken(kind, string(l.val), NewPos(l.line, l.col))
+	t := NewToken(kind, string(l.val), NewPos(l.line, l.col))
+	//fmt.Printf("%s\n", t)
+	return t
 }
 
 // isWhitespace returns true iff the rune is one of [ \t\r\n].
