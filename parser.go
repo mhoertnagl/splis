@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type Parser interface {
-	Parse()
+	Parse() Node
 }
 
 type parser struct {
@@ -15,10 +15,10 @@ func NewParser(lex Lexer) Parser {
 	return &parser{lex, nil}
 }
 
-func (p *parser) Parse() {
+func (p *parser) Parse() Node {
 	p.next()
-	p.expr()
-	fmt.Println()
+	return p.expr()
+	//fmt.Println()
 }
 
 func (p *parser) next() {
@@ -34,32 +34,36 @@ func (p *parser) expect(val string) {
 	}
 }
 
-func (p *parser) expr() {
+func (p *parser) expr() Node {
 	switch p.cur.Kind() {
 	case EOF:
-		return
+		return nil
 	case ERR:
 		panic("Lexer Error")
 	case NUM:
 		fmt.Printf("%s ", p.cur.Value())
 		// Return number node
-		break
+		//break
+		return NewNumNode(p.cur.Value())
 	case SYM:
 		fmt.Printf("%s ", p.cur.Value())
 		// Return symbol node
-		break
+		//break
+		return NewSymNode(p.cur.Value())
 	case PAR:
-		p.subExpr()
-		break
+		return p.subExpr()
 	}
+	return nil
 }
 
-func (p *parser) subExpr() {
+func (p *parser) subExpr() Node {
+	n := NewSExprNode()
 	p.expect("(")
 	p.next()
 	for p.cur.Value() != ")" {
-		p.expr()
+		n.Push(p.expr())
 		p.next()
 	}
 	p.expect(")")
+	return n
 }
