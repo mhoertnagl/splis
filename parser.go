@@ -29,9 +29,10 @@ func (p *parser) expect(val string) {
 	//p.next()
 	if p.cur.Value() != val {
 		fmt.Printf("Expecting [" + val + "] but got [" + p.cur.Value() + "].\n")
-	} else {
-		fmt.Printf("%s ", val)
 	}
+	// else {
+	// 	fmt.Printf("%s ", val)
+	// }
 }
 
 func (p *parser) expr() Node {
@@ -41,12 +42,12 @@ func (p *parser) expr() Node {
 	case ERR:
 		panic("Lexer Error")
 	case NUM:
-		fmt.Printf("%s ", p.cur.Value())
+		// fmt.Printf("%s ", p.cur.Value())
 		// Return number node
 		//break
 		return NewNumNode(p.cur.Value())
 	case SYM:
-		fmt.Printf("%s ", p.cur.Value())
+		// fmt.Printf("%s ", p.cur.Value())
 		// Return symbol node
 		//break
 		return NewSymNode(p.cur.Value())
