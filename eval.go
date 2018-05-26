@@ -19,17 +19,18 @@ func NewVM() VM {
 
 func (vm *vm) Eval(n Node) Node {
 	switch v := n.(type) {
-	case NumNode:
-		return v
-	case SymNode:
-		return v
-	case SExprNode:
+	// case NumNode:
+	// 	return v
+	// case SymNode:
+	// 	return v
+	case *sExprNode:
 		return vm.evalSExpr(v)
 	}
+	// Returns Numbers, Symbols and Q-Expressions as-is.
 	return n
 }
 
-func (vm *vm) evalSExpr(n SExprNode) Node {
+func (vm *vm) evalSExpr(n *sExprNode) Node {
 	if n.Len() == 0 {
 		return n
 	}
@@ -55,15 +56,14 @@ func (vm *vm) evalSExpr(n SExprNode) Node {
 }
 
 func evalAdd(args []Node) Node {
-	var sum int32 = 0
+	var sum int32
 	for _, arg := range args {
 		switch v := arg.(type) {
 		case NumNode:
 			sum += v.Value()
 			break
-		case SymNode:
-			break
-		case SExprNode:
+		default:
+			fmt.Printf("Cannot add the non-number [%s]", v)
 			break
 		}
 	}

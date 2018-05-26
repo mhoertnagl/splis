@@ -52,7 +52,7 @@ func (n *symNode) Name() string {
 	return n.name
 }
 
-type SExprNode interface {
+type SeqNode interface {
 	Push(c Node)
 	Cell(i int) Node
 	Len() int
@@ -62,7 +62,7 @@ type sExprNode struct {
 	cells []Node
 }
 
-func NewSExprNode() SExprNode {
+func NewSExprNode() SeqNode {
 	return &sExprNode{[]Node{}}
 }
 
@@ -75,5 +75,25 @@ func (n *sExprNode) Cell(i int) Node {
 }
 
 func (n *sExprNode) Len() int {
+	return len(n.cells)
+}
+
+type qExprNode struct {
+	cells []Node
+}
+
+func NewQExprNode() SeqNode {
+	return &qExprNode{[]Node{}}
+}
+
+func (n *qExprNode) Push(c Node) {
+	n.cells = append(n.cells, c)
+}
+
+func (n *qExprNode) Cell(i int) Node {
+	return n.cells[i]
+}
+
+func (n *qExprNode) Len() int {
 	return len(n.cells)
 }

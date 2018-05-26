@@ -18,21 +18,37 @@ func NewParser(lex Lexer) Parser {
 func (p *parser) Parse() Node {
 	p.next()
 	return p.expr()
-	//fmt.Println()
 }
 
 func (p *parser) next() {
 	p.cur = p.lex.Next()
 }
 
-func (p *parser) expect(val string) {
-	//p.next()
-	if p.cur.Value() != val {
-		fmt.Printf("Expecting [" + val + "] but got [" + p.cur.Value() + "].\n")
+func (p *parser) nextIsNot(val string) bool {
+	p.next()
+	v := p.cur.Value()
+	if p.cur.Kind() == EOF {
+		fmt.Printf("Unexprected end of file. Expecting [%s].", val)
+		panic("Unexprected end of file. Expecting [" + val + "].")
 	}
-	// else {
-	// 	fmt.Printf("%s ", val)
-	// }
+	return v != val
+}
+
+func (p *parser) expect(val string) {
+	v := p.cur.Value()
+	if v != val {
+		fmt.Printf("Expecting [%s] but got [%s].\n", val, v)
+		panic("Expecting [" + val + "] but got [" + v + "].")
+	}
+}
+
+func (p *parser) seq(l string, expr func() Node, r string, n SeqNode) Node {
+	p.expect(l)
+	for p.nextIsNot(r) {
+		n.Push(expr())
+	}
+	p.expect(r)
+	return n
 }
 
 func (p *parser) expr() Node {
@@ -42,29 +58,35 @@ func (p *parser) expr() Node {
 	case ERR:
 		panic("Lexer Error")
 	case NUM:
-		// fmt.Printf("%s ", p.cur.Value())
-		// Return number node
-		//break
 		return NewNumNode(p.cur.Value())
 	case SYM:
-		// fmt.Printf("%s ", p.cur.Value())
-		// Return symbol node
-		//break
 		return NewSymNode(p.cur.Value())
 	case PAR:
-		return p.subExpr()
+		return p.seq("(", p.expr, ")", NewSExprNode()) //p.sExpr()
+	case CBR:
+		return p.seq("{", p.expr, "}", NewQExprNode()) //p.qExpr()
 	}
 	return nil
 }
 
-func (p *parser) subExpr() Node {
-	n := NewSExprNode()
-	p.expect("(")
-	p.next()
-	for p.cur.Value() != ")" {
-		n.Push(p.expr())
-		p.next()
-	}
-	p.expect(")")
-	return n
-}
+// func (p *parser) sExpr() Node {
+// 	return p.seq("(", p.expr, ")", NewSExprNode())
+// 	// n :=
+// 	// 	p.expect("(")
+// 	// for p.nextIsNot(")") {
+// 	// 	n.Push(p.expr())
+// 	// }
+// 	// p.expect(")")
+// 	// return n
+// }
+//
+// func (p *parser) qExpr() Node {
+// 	return p.seq("{", p.expr, "}", NewQExprNode())
+// 	// n := NewQExprNode()
+// 	// p.expect("{")
+// 	// for p.nextIsNot("}") {
+// 	// 	n.Push(p.expr())
+// 	// }
+// 	// p.expect("}")
+// 	// return n
+// }

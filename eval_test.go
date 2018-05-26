@@ -31,3 +31,7 @@ func TestEvalSum3(t *testing.T) {
 func TestEvalSum4(t *testing.T) {
 	assertEvalEqual(t, "(+ (+ 1 1) (+ 1 1))", "4")
 }
+
+func TestEvalQExpr(t *testing.T) {
+	assertEvalEqual(t, "{(+ 1 1)}", "{(+ 1 1)}")
+}

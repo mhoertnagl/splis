@@ -15,6 +15,8 @@ const eof = rune(0)
 const (
 	// PAR are parentehsis tokens.
 	PAR Kind = iota
+	// CBR are curly braces tokens.
+	CBR
 	// NUM are numeric tokens.
 	NUM
 	// SYM is any character that is not a whitespace, a number or a parenthesis.
@@ -120,6 +122,9 @@ func (l *lexer) Next() Token {
 	case '(', ')':
 		l.read()
 		return l.token(PAR)
+	case '{', '}':
+		l.read()
+		return l.token(CBR)
 	}
 	if isWhitespace(c) {
 		l.readWhile(isWhitespace)

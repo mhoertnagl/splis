@@ -79,3 +79,9 @@ func TestLexComplexSExrp(t *testing.T) {
 	assert(t, l.Next(), NewToken(NUM, "0", NewPos(1, 7)))
 	assert(t, l.Next(), NewToken(PAR, ")", NewPos(1, 1)))
 }
+
+func TestLexCurlyBraces(t *testing.T) {
+	l := NewLexer("{}")
+	assert(t, l.Next(), NewToken(CBR, "{", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(CBR, "}", NewPos(1, 2)))
+}

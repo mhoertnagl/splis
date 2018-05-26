@@ -24,13 +24,24 @@ func assertSym(t *testing.T, r Node, name string) {
 	}
 }
 
-func assertSExpr(t *testing.T, r Node, len int) SExprNode {
-	rr, ok := r.(SExprNode)
+func assertSExpr(t *testing.T, r Node, len int) SeqNode {
+	rr, ok := r.(*sExprNode)
 	if !ok {
 		t.Errorf("Expected type [SExprNode] but got type [%v]", rr)
 	}
 	if rr.Len() != len {
 		t.Errorf("Expected S-Expr length of [%v] but got [%v]", len, rr.Len())
+	}
+	return rr
+}
+
+func assertQExpr(t *testing.T, r Node, len int) SeqNode {
+	rr, ok := r.(*qExprNode)
+	if !ok {
+		t.Errorf("Expected type [QExprNode] but got type [%v]", rr)
+	}
+	if rr.Len() != len {
+		t.Errorf("Expected Q-Expr length of [%v] but got [%v]", len, rr.Len())
 	}
 	return rr
 }
@@ -150,3 +161,17 @@ func TestParseSubElemSubExpr(t *testing.T) {
 	p := NewParser(l)
 	p.Parse()
 }
+
+func TestParseEmptyQExpr(t *testing.T) {
+	l := NewLexer("{}")
+	p := NewParser(l)
+	r := p.Parse()
+	assertQExpr(t, r, 0)
+}
+
+// func TestParseEmptyQExpr(t *testing.T) {
+// 	l := NewLexer("{()}")
+// 	p := NewParser(l)
+// 	r := p.Parse()
+// 	assertSExpr(t, r, 0)
+// }
