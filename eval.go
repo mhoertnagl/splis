@@ -7,38 +7,41 @@ type VM interface {
 }
 
 type vm struct {
-	builtins map[string]func(args []Node) Node
+	env Env
 }
 
 func NewVM() VM {
-	m := map[string]func(args []Node) Node{}
-	vm := &vm{m}
-	vm.builtins["+"] = evalAdd
+	e := NewEnvironment()
+	vm := &vm{e}
+	e.Set("+", NewFunNode(vm.evalAdd))
+	e.Set("def", NewFunNode(vm.defVar))
 	return vm
 }
 
 func (vm *vm) Eval(n Node) Node {
+	return vm.eval(vm.env, n)
+}
+
+func (vm *vm) eval(e Env, n Node) Node {
 	switch v := n.(type) {
-	// case NumNode:
-	// 	return v
-	// case SymNode:
-	// 	return v
+	case SymNode:
+		return e.Get(v.Name())
 	case *sExprNode:
-		return vm.evalSExpr(v)
+		return vm.evalSExpr(e, v)
 	}
-	// Returns Numbers, Symbols and Q-Expressions as-is.
+	// Return Numbers, Symbols and Q-Expressions as-is.
 	return n
 }
 
-func (vm *vm) evalSExpr(n *sExprNode) Node {
+func (vm *vm) evalSExpr(e Env, n *sExprNode) Node {
 	if n.Len() == 0 {
 		return n
 	}
 
-	f := n.Cell(0)
-	f1, ok := f.(SymNode)
+	f := vm.eval(e, n.Cell(0))
+	f1, ok := f.(FunNode)
 	if !ok {
-		fmt.Printf("First element of a S-Expr must be a Symbol but is [%s].", f1)
+		fmt.Printf("First element of a S-Expr must be a Function-Symbol but is [%v].\n", f1)
 		return n
 	}
 
@@ -47,15 +50,10 @@ func (vm *vm) evalSExpr(n *sExprNode) Node {
 		args = append(args, vm.Eval(n.Cell(i)))
 	}
 
-	b := vm.builtins[f1.Name()]
-	if b == nil {
-		fmt.Printf("Unupported builtin symbol [%s].", f1.Name())
-		return n
-	}
-	return b(args)
+	return f1.Apply(e, args)
 }
 
-func evalAdd(args []Node) Node {
+func (vm *vm) evalAdd(e Env, args []Node) Node {
 	var sum int32
 	for _, arg := range args {
 		switch v := arg.(type) {
@@ -63,9 +61,39 @@ func evalAdd(args []Node) Node {
 			sum += v.Value()
 			break
 		default:
-			fmt.Printf("Cannot add the non-number [%s]", v)
+			fmt.Printf("Cannot add the non-number [%v].\n", v)
 			break
 		}
 	}
 	return &numNode{sum}
+}
+
+func (vm *vm) defVar(e Env, args []Node) Node {
+	len := len(args)
+	if len < 2 {
+		fmt.Printf("Define requires at least 2 arguments.\n")
+		return NewSExprNode()
+	}
+
+	params, ok := args[0].(*qExprNode)
+	if !ok {
+		fmt.Printf("Define requires the first argument to be a Q-Expression.\n")
+		return NewSExprNode()
+	}
+
+	if params.Len() != len-1 {
+		fmt.Printf("Number of defined names [%d] and definitions [%d] must be the same.\n", params.Len(), len-1)
+		return NewSExprNode()
+	}
+
+	for i := 0; i < params.Len(); i++ {
+		param, ok := params.Cell(i).(SymNode)
+		if !ok {
+			fmt.Printf("Parameter name [%d] is not a Symbol. Definition names can only be Symbols.\n", i+1)
+			return NewSExprNode()
+		}
+		e.Set(param.Name(), vm.eval(e, args[i+1]))
+	}
+
+	return NewSExprNode()
 }

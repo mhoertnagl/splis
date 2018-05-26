@@ -85,3 +85,14 @@ func TestLexCurlyBraces(t *testing.T) {
 	assert(t, l.Next(), NewToken(CBR, "{", NewPos(1, 1)))
 	assert(t, l.Next(), NewToken(CBR, "}", NewPos(1, 2)))
 }
+
+func TestLexDef(t *testing.T) {
+	l := NewLexer("(def {a} 100)")
+	assert(t, l.Next(), NewToken(PAR, "(", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(SYM, "def", NewPos(1, 2)))
+	assert(t, l.Next(), NewToken(CBR, "{", NewPos(1, 1)))
+	assert(t, l.Next(), NewToken(SYM, "a", NewPos(1, 2)))
+	assert(t, l.Next(), NewToken(CBR, "}", NewPos(1, 2)))
+	assert(t, l.Next(), NewToken(NUM, "100", NewPos(1, 7)))
+	assert(t, l.Next(), NewToken(PAR, ")", NewPos(1, 2)))
+}

@@ -261,6 +261,6 @@ func isHex(c rune) bool {
 // and is not a whitespace character a decimal digit, '(' or ')'.
 func isSym(c rune) bool {
 	return unicode.IsPrint(c) &&
-		strings.ContainsRune(" \t\r\n0123456789()", c) == false
+		strings.ContainsRune(" \t\r\n0123456789(){}", c) == false
 	//return (isWhitespace(c) || isDec(c) || c == '(' || c == ')') == false
 }

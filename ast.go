@@ -97,3 +97,19 @@ func (n *qExprNode) Cell(i int) Node {
 func (n *qExprNode) Len() int {
 	return len(n.cells)
 }
+
+type FunNode interface {
+	Apply(env Env, args []Node) Node
+}
+
+type funNode struct {
+	fun func(Env, []Node) Node
+}
+
+func NewFunNode(fun func(Env, []Node) Node) FunNode {
+	return &funNode{fun}
+}
+
+func (n *funNode) Apply(env Env, args []Node) Node {
+	return n.fun(env, args)
+}
