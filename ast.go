@@ -113,3 +113,30 @@ func NewFunNode(fun func(Env, []Node) Node) FunNode {
 func (n *funNode) Apply(env Env, args []Node) Node {
 	return n.fun(env, args)
 }
+
+type LambdaNode interface {
+	Len() int
+	Param(i int) SymNode
+	Body() SeqNode
+}
+
+type lambdaNode struct {
+	params []SymNode
+	body   SeqNode
+}
+
+// func NewLambdaNode(params []SymNode, body SeqNode) LambdaNode {
+// 	return &lambdaNode{params, body}
+// }
+//
+// func (n *lambdaNode) Len() int {
+// 	return len(n.params)
+// }
+//
+// func (n *lambdaNode) Param(i int) SymNode {
+// 	return n.params[i]
+// }
+//
+// func (n *lambdaNode) Body() SeqNode {
+// 	return n.body
+// }

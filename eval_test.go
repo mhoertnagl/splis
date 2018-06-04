@@ -28,8 +28,16 @@ func TestEvalSum4(t *testing.T) {
 	assertEvalEqual(t, "(+ (+ 1 1) (+ 1 1))", "4")
 }
 
-func TestEvalQExpr(t *testing.T) {
+func TestInvariantQExpr(t *testing.T) {
 	assertEvalEqual(t, "{(+ 1 1)}", "{(+ 1 1)}")
+}
+
+func TestEvalQExpr(t *testing.T) {
+	assertEvalEqual(t, "(eval {+ 1 1})", "2")
+}
+
+func TestEvalSimpleLambda(t *testing.T) {
+	assertEvalEqual(t, "((lambda {a b} {+ a b}) 1 2)", "3")
 }
 
 func assertEvalEqual(t *testing.T, s string, e string) {

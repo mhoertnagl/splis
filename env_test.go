@@ -13,6 +13,12 @@ func TestEvalEnv2(t *testing.T) {
 	assertEnvEqual(t, vm, "b", "200")
 }
 
+// func TestEvalSubEnv(t *testing.T) {
+// 	vm := setupVM(t, "(def {a b} 50 200)")
+// 	assertEnvEqual(t, vm, "a", "50")
+// 	assertEnvEqual(t, vm, "b", "200")
+// }
+
 func setupVM(t *testing.T, s string) VM {
 	l := NewLexer(s)
 	p := NewParser(l)
