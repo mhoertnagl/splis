@@ -5,6 +5,7 @@ import "fmt"
 type Env interface {
 	Get(name string) Node
 	Set(name string, val Node)
+	All() map[string]Node
 }
 
 type env struct {
@@ -36,4 +37,8 @@ func (e *env) Get(name string) Node {
 func (e *env) Set(name string, val Node) {
 	//fmt.Printf("def [%s] = [%v].\n", name, val)
 	e.pool[name] = val
+}
+
+func (e *env) All() map[string]Node {
+	return e.pool
 }

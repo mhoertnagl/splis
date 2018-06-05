@@ -98,45 +98,46 @@ func (n *qExprNode) Len() int {
 	return len(n.cells)
 }
 
-type FunNode interface {
-	Apply(env Env, args []Node) Node
-}
+type Fun func(Env, []Node) Node
+
+// type FunNode interface {
+// 	Apply(m VM, e Env, as []Node) Node
+// }
 
 type funNode struct {
-	fun func(Env, []Node) Node
+	fun Fun
 }
 
-func NewFunNode(fun func(Env, []Node) Node) FunNode {
-	return &funNode{fun}
+func NewFunNode(f Fun) *funNode {
+	return &funNode{f}
 }
 
-func (n *funNode) Apply(env Env, args []Node) Node {
-	return n.fun(env, args)
-}
+// func (n *funNode) Apply(m VM, e Env, as []Node) Node {
+// 	return n.fun(m, e, as)
+// }
 
-type LambdaNode interface {
-	Len() int
-	Param(i int) SymNode
-	Body() SeqNode
-}
+// type LambdaNode interface {
+// 	Len() int
+// 	Param(i int) SymNode
+// 	Body() SeqNode
+// }
 
 type lambdaNode struct {
-	params []SymNode
-	body   SeqNode
+	env  Env
+	ps   []SymNode
+	body SeqNode
 }
 
-// func NewLambdaNode(params []SymNode, body SeqNode) LambdaNode {
-// 	return &lambdaNode{params, body}
-// }
-//
-// func (n *lambdaNode) Len() int {
-// 	return len(n.params)
-// }
-//
-// func (n *lambdaNode) Param(i int) SymNode {
-// 	return n.params[i]
-// }
-//
-// func (n *lambdaNode) Body() SeqNode {
-// 	return n.body
+func NewLambdaNode(e Env, ps []SymNode, body SeqNode) *lambdaNode {
+	return &lambdaNode{e, ps, body}
+}
+
+func (n *lambdaNode) Pop() SymNode {
+	h := n.ps[0]
+	n.ps = n.ps[1:]
+	return h
+}
+
+// func (n *lambdaNode) Apply(m VM, e Env, as []Node) Node {
+// 	return m.Eval()
 // }

@@ -8,8 +8,20 @@ func TestEvalEmpty(t *testing.T) {
 	assertEvalEqual(t, "()", "()")
 }
 
+func TestEvalNum(t *testing.T) {
+	assertEvalEqual(t, "99", "99")
+}
+
+func TestEvalSym(t *testing.T) {
+	assertEvalEqual(t, "false", "0")
+}
+
 func TestEvalUndefinedFunction(t *testing.T) {
-	assertEvalEqual(t, "(undefined)", "(undefined)")
+	assertEvalEqual(t, "(undefined)", "")
+}
+
+func TestEvalSingleNumInSExpr(t *testing.T) {
+	assertEvalEqual(t, "(1)", "1")
 }
 
 func TestEvalSum1(t *testing.T) {
@@ -32,12 +44,36 @@ func TestInvariantQExpr(t *testing.T) {
 	assertEvalEqual(t, "{(+ 1 1)}", "{(+ 1 1)}")
 }
 
+func TestEvalNum2(t *testing.T) {
+	assertEvalEqual(t, "(eval 1)", "1")
+}
+
+func TestEvalSym2(t *testing.T) {
+	assertEvalEqual(t, "(eval true)", "1")
+}
+
+func TestEvalSExpr(t *testing.T) {
+	assertEvalEqual(t, "(eval (+ 3 3 3))", "9")
+}
+
+func TestEvalIdQExpr(t *testing.T) {
+	assertEvalEqual(t, "(eval {1})", "1")
+}
+
 func TestEvalQExpr(t *testing.T) {
 	assertEvalEqual(t, "(eval {+ 1 1})", "2")
 }
 
+func TestEvalIDLambda(t *testing.T) {
+	assertEvalEqual(t, "((lambda {a} {a}) 666)", "666")
+}
+
 func TestEvalSimpleLambda(t *testing.T) {
 	assertEvalEqual(t, "((lambda {a b} {+ a b}) 1 2)", "3")
+}
+
+func TestEvalPartialLambda(t *testing.T) {
+	assertEvalEqual(t, "(((lambda {a b} {+ a b}) 1) 2)", "3")
 }
 
 func assertEvalEqual(t *testing.T, s string, e string) {

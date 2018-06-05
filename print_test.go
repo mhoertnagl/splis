@@ -49,3 +49,7 @@ func TestPrintQExpr2(t *testing.T) {
 func TestPrintQExpr3(t *testing.T) {
 	assertPrintEqual(t, "{+ (+ 1 1) 2}")
 }
+
+// func TestPrintFun(t *testing.T) {
+// 	assertPrintEqual(t, "(+)")
+// }
