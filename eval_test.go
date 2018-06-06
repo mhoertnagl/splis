@@ -44,6 +44,30 @@ func TestInvariantQExpr(t *testing.T) {
 	assertEvalEqual(t, "{(+ 1 1)}", "{(+ 1 1)}")
 }
 
+func TestLT0(t *testing.T) {
+	assertEvalEqual(t, "(< 1 2)", "1")
+}
+
+func TestLT1(t *testing.T) {
+	assertEvalEqual(t, "(< 1 1)", "0")
+}
+
+func TestLT2(t *testing.T) {
+	assertEvalEqual(t, "(< 1 0)", "0")
+}
+
+func TestLT3(t *testing.T) {
+	assertEvalEqual(t, "(< 1 0 0)", "< requires exactly [2] arguments.\n")
+}
+
+func TestLT4(t *testing.T) {
+	assertEvalEqual(t, "(< {} 0)", "First argument of < must be of type [Number] but is [Q-Expression].\n")
+}
+
+func TestLT5(t *testing.T) {
+	assertEvalEqual(t, "(< 1 {})", "Second argument of < must be of type [Number] but is [Q-Expression].\n")
+}
+
 func TestEvalNum2(t *testing.T) {
 	assertEvalEqual(t, "(eval 1)", "1")
 }

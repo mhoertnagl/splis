@@ -13,12 +13,13 @@ type vm struct {
 func NewVM() VM {
 	e := NewEnvironment()
 	vm := &vm{e}
-	e.Set("true", NewNumNode("1"))
-	e.Set("false", NewNumNode("0"))
-	e.Set("+", NewFunNode(vm.evalAdd))
-	e.Set("def", NewFunNode(vm.defVar))
-	e.Set("eval", NewFunNode(vm.evalNodes))
-	e.Set("lambda", NewFunNode(vm.makeLambda))
+	e.SetNum("true", 1)
+	e.SetNum("false", 0)
+	e.SetFun("+", vm.evalAdd)
+	e.SetFun("<", vm.evalLT)
+	e.SetFun("def", vm.defVar)
+	e.SetFun("eval", vm.evalNodes)
+	e.SetFun("lambda", vm.makeLambda)
 	return vm
 }
 
@@ -28,10 +29,10 @@ func (vm *vm) Eval(n Node) Node {
 
 func (vm *vm) eval(e Env, n Node) Node {
 	switch v := n.(type) {
-	case SymNode:
-		return e.Get(v.Name()) // Call Eval?
+	case *symNode:
+		return e.Get(v.name)
 	case *sExprNode:
-		return vm.evalSeq(e, v) //vm.evalSExpr(e, v)
+		return vm.evalSeq(e, v)
 	}
 	// Return Numbers and Q-Expressions as-is.
 	return n
@@ -44,7 +45,8 @@ func (vm *vm) evalSeq(e Env, n SeqNode) Node {
 
 	as := []Node{}
 	for i := 1; i < n.Len(); i++ {
-		as = append(as, vm.eval(e, n.Cell(i)))
+		a := vm.eval(e, n.Cell(i))
+		as = append(as, a)
 	}
 
 	fn := vm.eval(e, n.Cell(0))
@@ -70,11 +72,16 @@ func (vm *vm) evalLambda(n *lambdaNode, as []Node) Node {
 
 	// fmt.Printf("# Params [%d]\n", len(as))
 	for _, a := range as {
+		// Pop the first parameter of the function.
 		h := n.Pop()
 		// fmt.Printf("Lambda Param: %s\n", printAst(h))
-		n.env.Set(h.Name(), vm.eval(n.env, a))
+		// Evaluate the argument and bind the result to the parameter.
+		v := vm.eval(n.env, a)
+		n.env.Set(h.name, v)
 	}
 
+	// There are fewer arguments then function parameters. Return the function
+	// and its environment with available arguments bound.
 	if plen > alen {
 		// fmt.Printf("Partial Lambda: %s\n", printAst(n))
 		return n
@@ -87,8 +94,8 @@ func (vm *vm) evalAdd(e Env, as []Node) Node {
 	var sum int32
 	for _, a := range as {
 		switch v := a.(type) {
-		case NumNode:
-			sum += v.Value()
+		case *numNode:
+			sum += v.val
 			break
 		default:
 			fmt.Printf("Cannot add non-number [%v].\n", v)
@@ -96,6 +103,25 @@ func (vm *vm) evalAdd(e Env, as []Node) Node {
 		}
 	}
 	return &numNode{sum}
+}
+
+func (vm *vm) evalLT(e Env, as []Node) Node {
+	t := NewAssertion()
+	t.AssertLen(as, 2, "<")
+	t.AssertType(as[0], NUM_NODE, "First argument of <")
+	t.AssertType(as[1], NUM_NODE, "Second argument of <")
+
+	if t.Failed() {
+		return t.Error()
+	}
+
+	x, _ := as[0].(*numNode)
+	y, _ := as[1].(*numNode)
+
+	if x.val < y.val {
+		return &numNode{1}
+	}
+	return &numNode{0}
 }
 
 func (vm *vm) evalNodes(e Env, ns []Node) Node {
@@ -108,8 +134,8 @@ func (vm *vm) evalNodes(e Env, ns []Node) Node {
 
 func (vm *vm) evalNode(e Env, n Node) Node {
 	switch v := n.(type) {
-	case SymNode:
-		return e.Get(v.Name()) // Call Eval?
+	case *symNode:
+		return e.Get(v.name)
 	case *sExprNode:
 		return vm.evalSeq(e, v)
 	case *qExprNode:
@@ -120,64 +146,58 @@ func (vm *vm) evalNode(e Env, n Node) Node {
 }
 
 func (vm *vm) makeLambda(e Env, as []Node) Node {
-	len := len(as)
-	if len != 2 {
-		fmt.Printf("Lambda requires exactly 2 arguments.\n")
-		return NewSExprNode()
+	t := NewAssertion()
+	t.AssertLen(as, 2, "lambda")
+	t.AssertType(as[0], QXP_NODE, "First argument of lambda")
+	t.AssertType(as[1], QXP_NODE, "Second argument of lambda")
+
+	if t.Failed() {
+		return t.Error()
 	}
 
-	ps, pok := as[0].(*qExprNode)
-	if !pok {
-		fmt.Printf("Lambda requires the first argument to be a Q-Expression.\n")
-		return NewSExprNode()
-	}
+	ps, _ := as[0].(*qExprNode)
+	body, _ := as[1].(*qExprNode)
 
-	ss := []SymNode{}
+	ss := []*symNode{}
 	for i := 0; i < ps.Len(); i++ {
-		p, sok := ps.Cell(i).(SymNode)
-		if !sok {
-			fmt.Printf("Parameter [%d] is not a Symbol.\n", i+1)
-			return NewSExprNode()
+		p := ps.Cell(i)
+
+		if t.AssertType(p, SYM_NODE, "Lambda parameter") {
+			return t.Error()
 		}
-		ss = append(ss, p)
+
+		s, _ := ps.Cell(i).(*symNode)
+		ss = append(ss, s)
 	}
 
-	body, bok := as[1].(*qExprNode)
-	if !bok {
-		fmt.Printf("Lambda requires the second argument to be a Q-Expression.\n")
-		return NewSExprNode()
-	}
-
-	//fmt.Printf("Make Lambda\n")
 	return NewLambdaNode(NewSubEnvironment(e), ss, body)
 }
 
 func (vm *vm) defVar(e Env, as []Node) Node {
-	alen := len(as) - 1
-	if alen < 1 {
-		fmt.Printf("Define requires at least 2 arguments.\n")
-		return NewSExprNode()
+	t := NewAssertion()
+	t.AssertMin(as, 2, "Def")
+	t.AssertType(as[0], QXP_NODE, "First argument of def")
+
+	if t.Failed() {
+		return t.Error()
 	}
 
-	ps, ok := as[0].(*qExprNode)
-	if !ok {
-		fmt.Printf("Define requires the first argument to be a Q-Expression.\n")
-		return NewSExprNode()
-	}
+	ps, _ := as[0].(*qExprNode)
 
-	plen := ps.Len()
-	if plen != alen {
-		fmt.Printf("Number of defined names [%d] and definitions [%d] must be the same.\n", plen, alen)
-		return NewSExprNode()
+	if t.AssertIntEqual(ps.Len(), len(as)-1, "Number of names", "definitions") {
+		return t.Error()
 	}
 
 	for i := 0; i < ps.Len(); i++ {
-		p, ok := ps.Cell(i).(SymNode)
-		if !ok {
-			fmt.Printf("Parameter [%d] is not a Symbol.\n", i+1)
-			return NewSExprNode()
+		p := ps.Cell(i)
+
+		if t.AssertType(p, SYM_NODE, "Def parameter") {
+			return t.Error()
 		}
-		e.Set(p.Name(), vm.eval(e, as[i+1]))
+
+		s, _ := ps.Cell(i).(*symNode)
+		v := vm.eval(e, as[i+1])
+		e.Set(s.name, v)
 	}
 
 	return NewSExprNode()

@@ -5,22 +5,22 @@ import (
 )
 
 func assertNum(t *testing.T, r Node, n int32) {
-	rr, ok := r.(NumNode)
+	rr, ok := r.(*numNode)
 	if !ok {
 		t.Errorf("Expected type [NumNode] but got type [%v]", rr)
 	}
-	if rr.Value() != n {
-		t.Errorf("Expected number [%v] but got [%v]", n, rr.Value())
+	if rr.val != n {
+		t.Errorf("Expected number [%v] but got [%v]", n, rr.val)
 	}
 }
 
 func assertSym(t *testing.T, r Node, name string) {
-	rr, ok := r.(SymNode)
+	rr, ok := r.(*symNode)
 	if !ok {
 		t.Errorf("Expected type [SymNode] but got type [%v]", rr)
 	}
-	if rr.Name() != name {
-		t.Errorf("Expected symbol name [%v] but got [%v]", name, rr.Name())
+	if rr.name != name {
+		t.Errorf("Expected symbol name [%v] but got [%v]", name, rr.name)
 	}
 }
 

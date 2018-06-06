@@ -7,10 +7,12 @@ import (
 
 func printAst(n Node) string {
 	switch v := n.(type) {
-	case NumNode:
-		return fmt.Sprintf("%d", v.Value())
-	case SymNode:
-		return v.Name()
+	case *errNode:
+		return v.msg
+	case *numNode:
+		return fmt.Sprintf("%d", v.val)
+	case *symNode:
+		return v.name
 	case *sExprNode:
 		return printSeq(v, "(", printAst, ")")
 	case *qExprNode:

@@ -5,19 +5,65 @@ import (
 	"strings"
 )
 
-type Node interface {
+type NodeType int
+
+const (
+	ERR_NODE NodeType = iota
+	NUM_NODE
+	SYM_NODE
+	SXP_NODE
+	QXP_NODE
+	FUN_NODE
+	LBD_NODE
+)
+
+func (t NodeType) Name() string {
+	switch t {
+	case ERR_NODE:
+		return "Error"
+	case NUM_NODE:
+		return "Number"
+	case SYM_NODE:
+		return "Symbol"
+	case SXP_NODE:
+		return "S-Expression"
+	case QXP_NODE:
+		return "Q-Expression"
+	case FUN_NODE:
+		return "Function"
+	case LBD_NODE:
+		return "Lambda"
+	default:
+		return "unknown"
+	}
 }
 
-type NumNode interface {
-	Value() int32
+type Node interface {
+	Type() NodeType
+}
+
+type errNode struct {
+	msg string
+}
+
+func NewErrNode(msg string) *errNode {
+	return &errNode{msg}
+}
+
+func (n *errNode) Type() NodeType {
+	return ERR_NODE
 }
 
 type numNode struct {
 	val int32
 }
 
-func NewNumNode(s string) NumNode {
+func NewNumNode(s string) *numNode {
 	return &numNode{parseNumber(s)}
+}
+
+func (n *numNode) Type() NodeType {
+	return NUM_NODE
 }
 
 func parseNumber(s string) int32 {
@@ -32,27 +78,20 @@ func parseNumber(s string) int32 {
 	return int32(n)
 }
 
-func (n *numNode) Value() int32 {
-	return n.val
-}
-
-type SymNode interface {
-	Name() string
-}
-
 type symNode struct {
 	name string
 }
 
-func NewSymNode(s string) SymNode {
+func NewSymNode(s string) *symNode {
 	return &symNode{s}
 }
 
-func (n *symNode) Name() string {
-	return n.name
+func (n *symNode) Type() NodeType {
+	return SYM_NODE
 }
 
 type SeqNode interface {
+	Type() NodeType
 	Push(c Node)
 	Cell(i int) Node
 	Len() int
@@ -64,6 +103,10 @@ type sExprNode struct {
 
 func NewSExprNode() SeqNode {
 	return &sExprNode{[]Node{}}
+}
+
+func (n *sExprNode) Type() NodeType {
+	return SXP_NODE
 }
 
 func (n *sExprNode) Push(c Node) {
@@ -86,6 +129,10 @@ func NewQExprNode() SeqNode {
 	return &qExprNode{[]Node{}}
 }
 
+func (n *qExprNode) Type() NodeType {
+	return QXP_NODE
+}
+
 func (n *qExprNode) Push(c Node) {
 	n.cells = append(n.cells, c)
 }
@@ -100,10 +147,6 @@ func (n *qExprNode) Len() int {
 
 type Fun func(Env, []Node) Node
 
-// type FunNode interface {
-// 	Apply(m VM, e Env, as []Node) Node
-// }
-
 type funNode struct {
 	fun Fun
 }
@@ -112,32 +155,26 @@ func NewFunNode(f Fun) *funNode {
 	return &funNode{f}
 }
 
-// func (n *funNode) Apply(m VM, e Env, as []Node) Node {
-// 	return n.fun(m, e, as)
-// }
-
-// type LambdaNode interface {
-// 	Len() int
-// 	Param(i int) SymNode
-// 	Body() SeqNode
-// }
+func (n *funNode) Type() NodeType {
+	return FUN_NODE
+}
 
 type lambdaNode struct {
 	env  Env
-	ps   []SymNode
+	ps   []*symNode
 	body SeqNode
 }
 
-func NewLambdaNode(e Env, ps []SymNode, body SeqNode) *lambdaNode {
+func NewLambdaNode(e Env, ps []*symNode, body SeqNode) *lambdaNode {
 	return &lambdaNode{e, ps, body}
 }
 
-func (n *lambdaNode) Pop() SymNode {
+func (n *lambdaNode) Type() NodeType {
+	return LBD_NODE
+}
+
+func (n *lambdaNode) Pop() *symNode {
 	h := n.ps[0]
 	n.ps = n.ps[1:]
 	return h
 }
-
-// func (n *lambdaNode) Apply(m VM, e Env, as []Node) Node {
-// 	return m.Eval()
-// }

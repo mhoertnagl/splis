@@ -5,6 +5,8 @@ import "fmt"
 type Env interface {
 	Get(name string) Node
 	Set(name string, val Node)
+	SetNum(name string, num int32)
+	SetFun(name string, fun Fun)
 	All() map[string]Node
 }
 
@@ -37,6 +39,14 @@ func (e *env) Get(name string) Node {
 func (e *env) Set(name string, val Node) {
 	//fmt.Printf("def [%s] = [%v].\n", name, val)
 	e.pool[name] = val
+}
+
+func (e *env) SetNum(name string, num int32) {
+	e.Set(name, &numNode{num})
+}
+
+func (e *env) SetFun(name string, fun Fun) {
+	e.Set(name, NewFunNode(fun))
 }
 
 func (e *env) All() map[string]Node {
