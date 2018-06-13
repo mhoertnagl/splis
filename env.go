@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type Env interface {
 	Get(name string) Node
 	Set(name string, val Node)
@@ -32,8 +30,9 @@ func (e *env) Get(name string) Node {
 	if e.parent != nil {
 		return e.parent.Get(name)
 	}
-	fmt.Printf("Undefined name [%s].\n", name)
-	return nil
+	return NewErrNode("Unbound symbol [%s].\n", name)
+	// fmt.Printf("Unbound symbol [%s].\n", name)
+	// return nil
 }
 
 func (e *env) Set(name string, val Node) {

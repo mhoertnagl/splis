@@ -17,7 +17,7 @@ func TestEvalSym(t *testing.T) {
 }
 
 func TestEvalUndefinedFunction(t *testing.T) {
-	assertEvalEqual(t, "(undefined)", "")
+	assertEvalEqual(t, "(undefined)", "Unbound symbol [undefined].\n")
 }
 
 func TestEvalSingleNumInSExpr(t *testing.T) {
@@ -38,6 +38,10 @@ func TestEvalSum3(t *testing.T) {
 
 func TestEvalSum4(t *testing.T) {
 	assertEvalEqual(t, "(+ (+ 1 1) (+ 1 1))", "4")
+}
+
+func TestEvalSum1f(t *testing.T) {
+	assertEvalEqual(t, "(+ 1 {})", "Cannot add non-number [{}].\n")
 }
 
 func TestInvariantQExpr(t *testing.T) {
@@ -98,6 +102,74 @@ func TestEvalSimpleLambda(t *testing.T) {
 
 func TestEvalPartialLambda(t *testing.T) {
 	assertEvalEqual(t, "(((lambda {a b} {+ a b}) 1) 2)", "3")
+}
+
+func TestEvalTooManyArgsLambda(t *testing.T) {
+	assertEvalEqual(t, "((lambda {a b} {+ a b}) 1 2 3)", "Too many arguments [(lambda {a b} {+ a b})].\n")
+}
+
+func TestEvalEqual0(t *testing.T) {
+	assertEvalEqual(t, "(== 0 {})", "0")
+}
+
+func TestEvalEqual1(t *testing.T) {
+	assertEvalEqual(t, "(== 0 0)", "1")
+}
+
+func TestEvalEqual1f(t *testing.T) {
+	assertEvalEqual(t, "(== 0 1)", "0")
+}
+
+func TestEvalEqual2(t *testing.T) {
+	assertEvalEqual(t, "(== {x} {x})", "1")
+}
+
+func TestEvalEqual2f(t *testing.T) {
+	assertEvalEqual(t, "(== {x} {y})", "0")
+}
+
+func TestEvalEqual3(t *testing.T) {
+	assertEvalEqual(t, "(== {(+ 1 2)} {(+ 1 2)})", "1")
+}
+
+func TestEvalEqual3f(t *testing.T) {
+	assertEvalEqual(t, "(== {(+ 1 2)} {(+ 2 1)})", "0")
+}
+
+func TestEvalEqual3f2(t *testing.T) {
+	assertEvalEqual(t, "(== {(+ 1 2)} {(+ 1)})", "0")
+}
+
+func TestEvalEqual4t1(t *testing.T) {
+	assertEvalEqual(t, "(== (lambda {a b} {+ a b}) (lambda {a b} {+ a b}))", "1")
+}
+
+func TestEvalEqual4t2(t *testing.T) {
+	assertEvalEqual(t, "(== (lambda {a b} {+ a b}) (lambda {c b} {+ a b}))", "0")
+}
+
+func TestEvalEqual4f1(t *testing.T) {
+	assertEvalEqual(t, "(== (lambda {a} {+ a b}) (lambda {a b} {+ a b}))", "0")
+}
+
+func TestEvalEqual4f2(t *testing.T) {
+	assertEvalEqual(t, "(== (lambda {a b} {+ a}) (lambda {a b} {+ a b}))", "0")
+}
+
+func TestEvalEqual5(t *testing.T) {
+	assertEvalEqual(t, "(== + +)", "1")
+}
+
+func TestEvalEqual5f(t *testing.T) {
+	assertEvalEqual(t, "(== + <)", "0")
+}
+
+func TestEvalNE(t *testing.T) {
+	assertEvalEqual(t, "(!= 0 0)", "0")
+}
+
+func TestEvalNEf(t *testing.T) {
+	assertEvalEqual(t, "(!= 0 1)", "1")
 }
 
 func assertEvalEqual(t *testing.T, s string, e string) {

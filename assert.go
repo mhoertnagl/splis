@@ -21,7 +21,7 @@ func (a *assertion) Error() *errNode {
 
 func (a *assertion) AssertIntEqual(x int, y int, xName string, yName string) bool {
 	if a.ok && x != y {
-		msg := fmt.Sprintf("%s [%d] and %s [%d] must be the equal.\n", xName, x, yName, y)
+		msg := fmt.Sprintf("%s [%d] and %s [%d] must be equal.\n", xName, x, yName, y)
 		a.ok = false
 		a.err = NewErrNode(msg)
 	}

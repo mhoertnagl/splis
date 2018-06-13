@@ -14,11 +14,11 @@ func TestEvalEnv2(t *testing.T) {
 }
 
 func TestEvalEnv3(t *testing.T) {
-	setupVM(t, "(def {a} 50 200)", "Number of names [1] and definitions [2] must be the equal.\n")
+	setupVM(t, "(def {a} 50 200)", "Number of names [1] and definitions [2] must be equal.\n")
 }
 
 func TestEvalEnv4(t *testing.T) {
-	setupVM(t, "(def {a b} 50)", "Number of names [2] and definitions [1] must be the equal.\n")
+	setupVM(t, "(def {a b} 50)", "Number of names [2] and definitions [1] must be equal.\n")
 }
 
 func TestEvalEnv5(t *testing.T) {

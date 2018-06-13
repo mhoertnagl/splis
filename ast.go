@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -46,8 +47,8 @@ type errNode struct {
 	msg string
 }
 
-func NewErrNode(msg string) *errNode {
-	return &errNode{msg}
+func NewErrNode(msg string, args ...interface{}) *errNode {
+	return &errNode{fmt.Sprintf(msg, args...)}
 }
 
 func (n *errNode) Type() NodeType {

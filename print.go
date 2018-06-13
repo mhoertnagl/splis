@@ -20,7 +20,7 @@ func printAst(n Node) string {
 	// case *funNode:
 	// 	return fmt.Sprintf("<fun>")
 	case *lambdaNode:
-		return fmt.Sprintf("(lambda %s) %s", printAst(v.body), printEnv(v.env))
+		return fmt.Sprintf("(lambda %s %s)", printArgs(v.ps), printAst(v.body))
 	}
 	return ""
 }
@@ -35,6 +35,19 @@ func printSeq(v SeqNode, l string, printElements func(Node) string, r string) st
 		b.WriteString(printElements(v.Cell(i)))
 	}
 	b.WriteString(r)
+	return b.String()
+}
+
+func printArgs(as []*symNode) string {
+	var b bytes.Buffer
+	b.WriteString("{")
+	for i := 0; i < len(as); i++ {
+		if i > 0 {
+			b.WriteString(" ")
+		}
+		b.WriteString(as[i].name)
+	}
+	b.WriteString("}")
 	return b.String()
 }
 
