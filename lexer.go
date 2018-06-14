@@ -19,6 +19,8 @@ const (
 	CBR
 	// NUM are numeric tokens.
 	NUM
+	// STR are strings.
+	STR
 	// SYM is any character that is not a whitespace, a number or a parenthesis.
 	SYM
 	// EOF is the End Of File token.
@@ -125,6 +127,8 @@ func (l *lexer) Next() Token {
 	case '{', '}':
 		l.read()
 		return l.token(CBR)
+	case '"':
+		return l.nextString()
 	}
 	if isWhitespace(c) {
 		l.readWhile(isWhitespace)
@@ -158,13 +162,57 @@ func (l *lexer) nextNum() Token {
 	return l.token(NUM)
 }
 
+// func (l *lexer) nextString() Token {
+// 	l.skip()
+// 	c := l.peek()
+// 	for c != eof && c != '"' {
+// 		l.read()
+// 		// Read the next character as well if the current character is a backslash.
+// 		if c == '\\' {
+// 			l.read()
+// 		}
+// 		c = l.peek()
+// 	}
+// 	l.skip()
+// 	return l.token(STR)
+// }
+
+func (l *lexer) nextString() Token {
+	l.skip()
+	for {
+		switch l.peek() {
+		case eof:
+			return l.err("Missing closing quote.")
+		case '"':
+			l.skip()
+			return l.token(STR)
+		case '\\':
+			l.skip()
+			e := l.peek()
+			switch e {
+			case 'n':
+				l.append('\n')
+				l.skip()
+			case '\\':
+				l.read()
+			default:
+				return l.err("Unrecognized escape sequence [\\%s].", string(e))
+			}
+			break
+		default:
+			l.read()
+			break
+		}
+	}
+}
+
 // NOTE: Symbols may not contain any decimal digits.
 func (l *lexer) nextSymbol() Token {
 	l.readWhile(isSym)
 	return l.token(SYM)
 }
 
-// peek at the next character in the input stream. Will not consume the
+// peek at the next character on the input stream. Will not consume the
 // character.
 func (l *lexer) peek() rune {
 	if l.pos < l.len {
@@ -173,29 +221,43 @@ func (l *lexer) peek() rune {
 	return eof
 }
 
-// read peeks and consumes a single character from the input.
-func (l *lexer) read() rune {
+// append a character to the end of the lexeme.
+func (l *lexer) append(c rune) {
+	l.val = append(l.val, c)
+}
+
+// skip the next character on the input stream. This will however update the
+// lexer's positional state.
+func (l *lexer) skip() rune {
 	c := l.peek()
 	if c == eof {
 		return eof
-	} else if c == '\n' {
+	}
+	if c == '\n' {
 		l.line++
 		l.col = 1
 	} else {
 		l.col++
 	}
-	l.val = append(l.val, c)
 	l.pos++
+	return c
+}
+
+// read peeks and consumes a single character from the input stream.
+func (l *lexer) read() rune {
+	c := l.skip()
+	if c == eof {
+		return eof
+	}
+	l.append(c)
 	return c
 }
 
 // readWhile consumes characters from the input as long as the predicate for
 // each character returns true.
 func (l *lexer) readWhile(pred func(rune) bool) {
-	c := l.peek()
-	for c != eof && pred(c) {
+	for c := l.peek(); c != eof && pred(c); c = l.peek() {
 		l.read()
-		c = l.peek()
 	}
 }
 
@@ -213,16 +275,15 @@ func (l *lexer) test(s string) bool {
 
 // expect compares the next characters with the string s and will consume any
 // matching character up until the first mismatch if any. A mismatch will prompt
-// an error message. Subsequent potentially matching characters will not be
-// consumed.
+// an error message and abort further consumption.
 func (l *lexer) expect(s string) {
 	for _, c := range s {
 		r := l.peek()
 		if r == rune(c) {
 			l.read()
 		} else {
-			// Print Error.
-			return
+			t := string(l.val[len(l.val)-len(s):])
+			panic(fmt.Sprintf("FATAL: Lexer expected [%s] but got [%s].", s, t))
 		}
 	}
 }
@@ -230,10 +291,12 @@ func (l *lexer) expect(s string) {
 // token returns a new Token of a certain type coalescing the lexer's gathered
 // scanning state.
 func (l *lexer) token(kind Kind) Token {
-	//return NewToken(kind, string(l.val), NewPos(l.line, l.col))
-	t := NewToken(kind, string(l.val), NewPos(l.line, l.col))
-	//fmt.Printf("%s\n", t)
-	return t
+	return NewToken(kind, string(l.val), NewPos(l.line, l.col))
+}
+
+// err returns an error Token with an error message.
+func (l *lexer) err(msg string, args ...interface{}) Token {
+	return NewToken(ERR, fmt.Sprintf(msg, args...), NewPos(l.line, l.col))
 }
 
 // isWhitespace returns true iff the rune is one of [ \t\r\n].

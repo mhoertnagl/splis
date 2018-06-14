@@ -38,6 +38,36 @@ func TestLexNumHex(t *testing.T) {
 	assertLex(t, l.Next(), NewToken(NUM, "0x0123456789ABCDEF", NewPos(1, 1)))
 }
 
+func TestLexEmptyString(t *testing.T) {
+	l := NewLexer("\"\"")
+	assertLex(t, l.Next(), NewToken(STR, "", NewPos(1, 1)))
+}
+
+func TestLexSimpleString(t *testing.T) {
+	l := NewLexer("\"abc\"")
+	assertLex(t, l.Next(), NewToken(STR, "abc", NewPos(1, 1)))
+}
+
+func TestLexEscapedNewlineString(t *testing.T) {
+	l := NewLexer("\"a\\nbc\"")
+	assertLex(t, l.Next(), NewToken(STR, "a\nbc", NewPos(1, 1)))
+}
+
+func TestLexEscapedBackslashString(t *testing.T) {
+	l := NewLexer("\"a\\\\bc\"")
+	assertLex(t, l.Next(), NewToken(STR, "a\\bc", NewPos(1, 1)))
+}
+
+func TestLexEscapedUnrecognizedString(t *testing.T) {
+	l := NewLexer("\"a\\xbc\"")
+	assertLex(t, l.Next(), NewToken(ERR, "Unrecognized escape sequence [\\x].", NewPos(1, 1)))
+}
+
+func TestLexOpenString(t *testing.T) {
+	l := NewLexer("\"abc")
+	assertLex(t, l.Next(), NewToken(ERR, "Missing closing quote.", NewPos(1, 1)))
+}
+
 func TestLexPars(t *testing.T) {
 	l := NewLexer("()")
 	assertLex(t, l.Next(), NewToken(PAR, "(", NewPos(1, 1)))
