@@ -162,21 +162,8 @@ func (l *lexer) nextNum() Token {
 	return l.token(NUM)
 }
 
-// func (l *lexer) nextString() Token {
-// 	l.skip()
-// 	c := l.peek()
-// 	for c != eof && c != '"' {
-// 		l.read()
-// 		// Read the next character as well if the current character is a backslash.
-// 		if c == '\\' {
-// 			l.read()
-// 		}
-// 		c = l.peek()
-// 	}
-// 	l.skip()
-// 	return l.token(STR)
-// }
-
+// nextString accepts strings that may contain escape sequences. Will return a
+// string Token containing the string value without trailing quotes.
 func (l *lexer) nextString() Token {
 	l.skip()
 	for {
