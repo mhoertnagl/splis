@@ -20,6 +20,8 @@ func NewVM() VM {
 	e.SetFun("def", vm.defVar)
 	e.SetFun("eval", vm.evalNodes)
 	e.SetFun("lambda", vm.makeLambda)
+	e.SetFun("if", vm.evalIf)
+	e.SetFun("&&", vm.evalAnd)
 	return vm
 }
 

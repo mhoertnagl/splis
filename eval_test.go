@@ -172,6 +172,46 @@ func TestEvalNEf(t *testing.T) {
 	assertEvalEqual(t, "(!= 0 1)", "1")
 }
 
+func TestEvalIf1(t *testing.T) {
+	assertEvalEqual(t, "(if (< 1 2) {+ 1 2} {4})", "3")
+}
+
+func TestEvalIf2(t *testing.T) {
+	assertEvalEqual(t, "(if (< 2 1) {+ 1 2} {4})", "4")
+}
+
+func TestEvalIff1(t *testing.T) {
+	assertEvalEqual(t, "(if a {+ 1 2} {4})", "First argument of if must be of type [Number] but is [Error].\n")
+}
+
+func TestEvalIff2(t *testing.T) {
+	assertEvalEqual(t, "(if (< 1 2) (+ 1 2) {4})", "Second argument of if must be of type [Q-Expression] but is [Number].\n")
+}
+
+func TestEvalIff3(t *testing.T) {
+	assertEvalEqual(t, "(if (< 1 2) {+ 1 2} 4)", "Third argument of if must be of type [Q-Expression] but is [Number].\n")
+}
+
+func TestEvalAnd1(t *testing.T) {
+	assertEvalEqual(t, "(&& (< 1 2))", "1")
+}
+
+func TestEvalAnd2(t *testing.T) {
+	assertEvalEqual(t, "(&& (< 2 1))", "0")
+}
+
+func TestEvalAnd3(t *testing.T) {
+	assertEvalEqual(t, "(&& (< 1 2) (< 2 3))", "1")
+}
+
+func TestEvalAnd4(t *testing.T) {
+	assertEvalEqual(t, "(&& (< 2 1) (< 2 3))", "0")
+}
+
+func TestEvalAnd5(t *testing.T) {
+	assertEvalEqual(t, "(&& (< 1 2) (< 3 2))", "0")
+}
+
 func assertEvalEqual(t *testing.T, s string, e string) {
 	l := NewLexer(s)
 	p := NewParser(l)
