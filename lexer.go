@@ -129,9 +129,18 @@ func (l *lexer) Next() Token {
 		return l.token(CBR)
 	case '"':
 		return l.nextString()
+		// case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		// 	return l.nextNum()
 	}
 	if isWhitespace(c) {
 		l.readWhile(isWhitespace)
+		return l.Next()
+	}
+	if l.test("//") {
+		l.expect("//")
+		for d := l.peek(); d != '\n' && d != eof; d = l.peek() {
+			l.skip()
+		}
 		return l.Next()
 	}
 	if isDec(c) {

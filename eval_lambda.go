@@ -31,6 +31,9 @@ func (vm *vm) makeLambda(e Env, as []Node) Node {
 func (vm *vm) evalLambda(n *lambdaNode, as []Node) Node {
 	plen := len(n.ps)
 	alen := len(as)
+
+	// We cannot apply more arguments than there are parameters for the
+	// function.
 	if plen < alen {
 		return NewErrNode("Too many arguments [%v].\n", printAst(n))
 	}

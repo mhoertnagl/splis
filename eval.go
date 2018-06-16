@@ -22,6 +22,8 @@ func NewVM() VM {
 	e.SetFun("lambda", vm.makeLambda)
 	e.SetFun("if", vm.evalIf)
 	e.SetFun("&&", vm.evalAnd)
+	e.SetFun("load", vm.evalLoad)
+	e.SetFun("execute", vm.evalExecute)
 	return vm
 }
 

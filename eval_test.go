@@ -212,6 +212,14 @@ func TestEvalAnd5(t *testing.T) {
 	assertEvalEqual(t, "(&& (< 1 2) (< 3 2))", "0")
 }
 
+func TestEvalLoad(t *testing.T) {
+	assertEvalEqual(t, "(load \"test/load.splis\")", "\"(def {x} 1)\"")
+}
+
+func TestEvalExecute(t *testing.T) {
+	assertEvalEqual(t, "(execute \"(+ 1 4)\")", "5")
+}
+
 func assertEvalEqual(t *testing.T, s string, e string) {
 	l := NewLexer(s)
 	p := NewParser(l)
