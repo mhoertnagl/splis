@@ -12,7 +12,9 @@ func (vm *vm) evalIf(e Env, as []Node) Node {
 	}
 
 	if as[0].(*numNode).val != 0 {
-		return vm.evalNode(e, as[1])
+		as[1].(*seqNode).typ = SXP_NODE
+		return vm.eval(e, as[1])
 	}
-	return vm.evalNode(e, as[2])
+	as[2].(*seqNode).typ = SXP_NODE
+	return vm.eval(e, as[2])
 }

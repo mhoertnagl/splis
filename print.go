@@ -11,11 +11,14 @@ func printAst(n Node) string {
 		return v.msg
 	case *numNode:
 		return fmt.Sprintf("%d", v.val)
+	case *strNode:
+		return fmt.Sprintf("\"%s\"", v.str)
 	case *symNode:
 		return v.name
-	case *sExprNode:
-		return printSeq(v, "(", printAst, ")")
-	case *qExprNode:
+	case *seqNode:
+		if v.typ == SXP_NODE {
+			return printSeq(v, "(", printAst, ")")
+		}
 		return printSeq(v, "{", printAst, "}")
 	// case *funNode:
 	// 	return fmt.Sprintf("<fun>")
@@ -25,14 +28,14 @@ func printAst(n Node) string {
 	return ""
 }
 
-func printSeq(v SeqNode, l string, printElements func(Node) string, r string) string {
+func printSeq(v *seqNode, l string, printElements func(Node) string, r string) string {
 	var b bytes.Buffer
 	b.WriteString(l)
-	for i := 0; i < v.Len(); i++ {
+	for i := 0; i < len(v.cells); i++ {
 		if i > 0 {
 			b.WriteString(" ")
 		}
-		b.WriteString(printElements(v.Cell(i)))
+		b.WriteString(printElements(v.cells[i]))
 	}
 	b.WriteString(r)
 	return b.String()

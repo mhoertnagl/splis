@@ -59,9 +59,9 @@ func (vm *vm) evalEQ2(e Env, x Node, y Node) bool {
 	case SYM_NODE:
 		return vm.evalSymEQ(e, x.(*symNode), y.(*symNode))
 	case SXP_NODE:
-		return vm.evalSeqEQ(e, x.(*sExprNode), y.(*sExprNode))
+		return vm.evalSeqEQ(e, x.(*seqNode), y.(*seqNode))
 	case QXP_NODE:
-		return vm.evalSeqEQ(e, x.(*qExprNode), y.(*qExprNode))
+		return vm.evalSeqEQ(e, x.(*seqNode), y.(*seqNode))
 	case FUN_NODE:
 		return vm.evalFunEQ(e, x.(*funNode), y.(*funNode))
 	case LBD_NODE:
@@ -82,12 +82,12 @@ func (vm *vm) evalSymEQ(e Env, x *symNode, y *symNode) bool {
 	return x.name == y.name
 }
 
-func (vm *vm) evalSeqEQ(e Env, x SeqNode, y SeqNode) bool {
-	if x.Len() != y.Len() {
+func (vm *vm) evalSeqEQ(e Env, x *seqNode, y *seqNode) bool {
+	if len(x.cells) != len(y.cells) {
 		return false
 	}
-	for i := 0; i < x.Len(); i++ {
-		if vm.evalEQ2(e, x.Cell(i), y.Cell(i)) == false {
+	for i := 0; i < len(x.cells); i++ {
+		if vm.evalEQ2(e, x.cells[i], y.cells[i]) == false {
 			return false
 		}
 	}

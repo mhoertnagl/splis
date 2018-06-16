@@ -18,7 +18,7 @@ func NewVM() VM {
 	e.SetFun("==", vm.evalEQ)
 	e.SetFun("!=", vm.evalNE)
 	e.SetFun("def", vm.defVar)
-	e.SetFun("eval", vm.evalNodes)
+	e.SetFun("eval", vm.evalEval)
 	e.SetFun("lambda", vm.makeLambda)
 	e.SetFun("if", vm.evalIf)
 	e.SetFun("&&", vm.evalAnd)
@@ -35,27 +35,30 @@ func (vm *vm) eval(e Env, n Node) Node {
 	switch v := n.(type) {
 	case *symNode:
 		return e.Get(v.name)
-	case *sExprNode:
-		return vm.evalSeq(e, v)
+	case *seqNode:
+		if v.typ == SXP_NODE {
+			return vm.evalSeq(e, v)
+		}
 	}
-	// Return Numbers and Q-Expressions as-is.
+	// Return Numbers, Strings and Q-Expressions as-is.
 	return n
 }
 
-func (vm *vm) evalSeq(e Env, n SeqNode) Node {
-	if n.Len() == 0 {
+func (vm *vm) evalSeq(e Env, n *seqNode) Node {
+	if len(n.cells) == 0 {
 		return n
 	}
 
 	// Evaluate all function arguments.
 	as := []Node{}
-	for i := 1; i < n.Len(); i++ {
-		a := vm.eval(e, n.Cell(i))
+	for i := 1; i < len(n.cells); i++ {
+		a := vm.eval(e, n.cells[i])
 		as = append(as, a)
 	}
 
-	// Evaluate the sequence head. If it evaluates to a function or lambda, apply.
-	fn := vm.eval(e, n.Cell(0))
+	// Evaluate the sequence head. If it evaluates to a function or lambda,
+	// apply the arguments.
+	fn := vm.eval(e, n.cells[0])
 	switch f := fn.(type) {
 	case *funNode:
 		return f.fun(e, as)
@@ -66,23 +69,14 @@ func (vm *vm) evalSeq(e Env, n SeqNode) Node {
 	}
 }
 
-func (vm *vm) evalNodes(e Env, ns []Node) Node {
+func (vm *vm) evalEval(e Env, ns []Node) Node {
 	var r Node = NewSExprNode()
 	for _, n := range ns {
-		r = vm.evalNode(e, n)
+		if n.Type() == QXP_NODE {
+			q, _ := n.(*seqNode)
+			q.typ = SXP_NODE
+		}
+		r = vm.eval(e, n)
 	}
 	return r
-}
-
-func (vm *vm) evalNode(e Env, n Node) Node {
-	switch v := n.(type) {
-	case *symNode:
-		return e.Get(v.name)
-	case *sExprNode:
-		return vm.evalSeq(e, v)
-	case *qExprNode:
-		return vm.evalSeq(e, v)
-	default:
-		return v
-	}
 }

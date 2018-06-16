@@ -22,6 +22,14 @@ func TestPrintNum0(t *testing.T) {
 	assertPrintEqual(t, "0")
 }
 
+func TestPrintEmptyString(t *testing.T) {
+	assertPrintEqual(t, "\"\"")
+}
+
+func TestPrintString(t *testing.T) {
+	assertPrintEqual(t, "\"splis\"")
+}
+
 func TestPrintEmptySExpr(t *testing.T) {
 	assertPrintEqual(t, "()")
 }

@@ -10,18 +10,18 @@ func (vm *vm) makeLambda(e Env, as []Node) Node {
 		return t.Error()
 	}
 
-	ps, _ := as[0].(*qExprNode)
-	body, _ := as[1].(*qExprNode)
+	ps, _ := as[0].(*seqNode)
+	body, _ := as[1].(*seqNode)
 
 	ss := []*symNode{}
-	for i := 0; i < ps.Len(); i++ {
-		p := ps.Cell(i)
+	for i := 0; i < len(ps.cells); i++ {
+		p := ps.cells[i]
 
 		if t.AssertType(p, SYM_NODE, "Lambda parameter") {
 			return t.Error()
 		}
 
-		s, _ := ps.Cell(i).(*symNode)
+		s, _ := p.(*symNode)
 		ss = append(ss, s)
 	}
 
@@ -49,5 +49,6 @@ func (vm *vm) evalLambda(n *lambdaNode, as []Node) Node {
 		return n
 	}
 	// All parameters are bound and the lambda function can be evaluated.
-	return vm.evalNode(n.env, n.body)
+	n.body.typ = SXP_NODE
+	return vm.eval(n.env, n.body)
 }

@@ -65,8 +65,8 @@ func TestParseEmpty2SubExpr(t *testing.T) {
 	p := NewParser(l)
 	r := p.Parse()
 	s0 := assertSExpr(t, r, 1)
-	s1 := assertSExpr(t, s0.Cell(0), 1)
-	assertSExpr(t, s1.Cell(0), 0)
+	s1 := assertSExpr(t, s0.cells[0], 1)
+	assertSExpr(t, s1.cells[0], 0)
 }
 
 // func TestParseIncompleteEmptySubExpr1(t *testing.T) {
@@ -86,7 +86,7 @@ func TestParseSingleElemSubExpr(t *testing.T) {
 	p := NewParser(l)
 	r := p.Parse()
 	s := assertSExpr(t, r, 1)
-	assertSym(t, s.Cell(0), "x")
+	assertSym(t, s.cells[0], "x")
 }
 
 func TestParse3ElemSubExpr(t *testing.T) {
@@ -94,9 +94,9 @@ func TestParse3ElemSubExpr(t *testing.T) {
 	p := NewParser(l)
 	r := p.Parse()
 	s := assertSExpr(t, r, 3)
-	assertSym(t, s.Cell(0), "+")
-	assertNum(t, s.Cell(1), 5)
-	assertNum(t, s.Cell(2), 6)
+	assertSym(t, s.cells[0], "+")
+	assertNum(t, s.cells[1], 5)
+	assertNum(t, s.cells[2], 6)
 }
 
 func TestParseSubElem1SubExpr(t *testing.T) {
@@ -104,13 +104,13 @@ func TestParseSubElem1SubExpr(t *testing.T) {
 	p := NewParser(l)
 	r := p.Parse()
 	s0 := assertSExpr(t, r, 3)
-	assertSym(t, s0.Cell(0), "+")
-	s1 := assertSExpr(t, s0.Cell(1), 4)
-	assertSym(t, s1.Cell(0), "*")
-	assertNum(t, s1.Cell(1), 3)
-	assertNum(t, s1.Cell(2), 4)
-	assertNum(t, s1.Cell(3), 3)
-	assertNum(t, s0.Cell(2), 6)
+	assertSym(t, s0.cells[0], "+")
+	s1 := assertSExpr(t, s0.cells[1], 4)
+	assertSym(t, s1.cells[0], "*")
+	assertNum(t, s1.cells[1], 3)
+	assertNum(t, s1.cells[2], 4)
+	assertNum(t, s1.cells[3], 3)
+	assertNum(t, s0.cells[2], 6)
 }
 
 func TestParseSubElem2SubExpr(t *testing.T) {
@@ -118,12 +118,12 @@ func TestParseSubElem2SubExpr(t *testing.T) {
 	p := NewParser(l)
 	r := p.Parse()
 	s0 := assertSExpr(t, r, 3)
-	assertSym(t, s0.Cell(0), "+")
-	assertNum(t, s0.Cell(1), 4)
-	s1 := assertSExpr(t, s0.Cell(2), 3)
-	assertSym(t, s1.Cell(0), "/")
-	assertNum(t, s1.Cell(1), 9)
-	assertNum(t, s1.Cell(2), 3)
+	assertSym(t, s0.cells[0], "+")
+	assertNum(t, s0.cells[1], 4)
+	s1 := assertSExpr(t, s0.cells[2], 3)
+	assertSym(t, s1.cells[0], "/")
+	assertNum(t, s1.cells[1], 9)
+	assertNum(t, s1.cells[2], 3)
 }
 
 func TestParseSubElemSubExpr(t *testing.T) {
@@ -186,24 +186,30 @@ func assertSym(t *testing.T, r Node, name string) {
 	}
 }
 
-func assertSExpr(t *testing.T, r Node, len int) SeqNode {
-	rr, ok := r.(*sExprNode)
+func assertSExpr(t *testing.T, r Node, l int) *seqNode {
+	rr, ok := r.(*seqNode)
 	if !ok {
+		t.Errorf("Expected type [SeqNode] but got type [%v]", rr)
+	}
+	if rr.typ != SXP_NODE {
 		t.Errorf("Expected type [SExprNode] but got type [%v]", rr)
 	}
-	if rr.Len() != len {
-		t.Errorf("Expected S-Expr length of [%v] but got [%v]", len, rr.Len())
+	if len(rr.cells) != l {
+		t.Errorf("Expected S-Expr length of [%v] but got [%v]", l, len(rr.cells))
 	}
 	return rr
 }
 
-func assertQExpr(t *testing.T, r Node, len int) SeqNode {
-	rr, ok := r.(*qExprNode)
+func assertQExpr(t *testing.T, r Node, l int) *seqNode {
+	rr, ok := r.(*seqNode)
 	if !ok {
+		t.Errorf("Expected type [SeqNode] but got type [%v]", rr)
+	}
+	if rr.typ != QXP_NODE {
 		t.Errorf("Expected type [QExprNode] but got type [%v]", rr)
 	}
-	if rr.Len() != len {
-		t.Errorf("Expected Q-Expr length of [%v] but got [%v]", len, rr.Len())
+	if len(rr.cells) != l {
+		t.Errorf("Expected Q-Expr length of [%v] but got [%v]", l, len(rr.cells))
 	}
 	return rr
 }

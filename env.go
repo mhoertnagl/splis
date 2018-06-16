@@ -31,12 +31,9 @@ func (e *env) Get(name string) Node {
 		return e.parent.Get(name)
 	}
 	return NewErrNode("Unbound symbol [%s].\n", name)
-	// fmt.Printf("Unbound symbol [%s].\n", name)
-	// return nil
 }
 
 func (e *env) Set(name string, val Node) {
-	//fmt.Printf("def [%s] = [%v].\n", name, val)
 	e.pool[name] = val
 }
 

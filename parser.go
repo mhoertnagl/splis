@@ -42,7 +42,7 @@ func (p *parser) expect(val string) {
 	}
 }
 
-func (p *parser) seq(l string, expr func() Node, r string, n SeqNode) Node {
+func (p *parser) seq(l string, expr func() Node, r string, n *seqNode) Node {
 	p.expect(l)
 	for p.nextIsNot(r) {
 		n.Push(expr())

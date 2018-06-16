@@ -106,59 +106,25 @@ func (n *symNode) Type() NodeType {
 	return SYM_NODE
 }
 
-type SeqNode interface {
-	Type() NodeType
-	Push(c Node)
-	Cell(i int) Node
-	Len() int
-}
-
-type sExprNode struct {
+type seqNode struct {
+	typ   NodeType
 	cells []Node
 }
 
-func NewSExprNode() SeqNode {
-	return &sExprNode{[]Node{}}
+func NewSExprNode() *seqNode {
+	return &seqNode{SXP_NODE, []Node{}}
 }
 
-func (n *sExprNode) Type() NodeType {
-	return SXP_NODE
+func NewQExprNode() *seqNode {
+	return &seqNode{QXP_NODE, []Node{}}
 }
 
-func (n *sExprNode) Push(c Node) {
+func (n *seqNode) Type() NodeType {
+	return n.typ
+}
+
+func (n *seqNode) Push(c Node) {
 	n.cells = append(n.cells, c)
-}
-
-func (n *sExprNode) Cell(i int) Node {
-	return n.cells[i]
-}
-
-func (n *sExprNode) Len() int {
-	return len(n.cells)
-}
-
-type qExprNode struct {
-	cells []Node
-}
-
-func NewQExprNode() SeqNode {
-	return &qExprNode{[]Node{}}
-}
-
-func (n *qExprNode) Type() NodeType {
-	return QXP_NODE
-}
-
-func (n *qExprNode) Push(c Node) {
-	n.cells = append(n.cells, c)
-}
-
-func (n *qExprNode) Cell(i int) Node {
-	return n.cells[i]
-}
-
-func (n *qExprNode) Len() int {
-	return len(n.cells)
 }
 
 type Fun func(Env, []Node) Node
@@ -178,10 +144,10 @@ func (n *funNode) Type() NodeType {
 type lambdaNode struct {
 	env  Env
 	ps   []*symNode
-	body SeqNode
+	body *seqNode
 }
 
-func NewLambdaNode(e Env, ps []*symNode, body SeqNode) *lambdaNode {
+func NewLambdaNode(e Env, ps []*symNode, body *seqNode) *lambdaNode {
 	return &lambdaNode{e, ps, body}
 }
 
