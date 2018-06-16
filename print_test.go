@@ -14,9 +14,9 @@ func assertPrintEqual(t *testing.T, s string) {
 	}
 }
 
-func TestPrintEmpty(t *testing.T) {
-	assertPrintEqual(t, "")
-}
+// func TestPrintEmpty(t *testing.T) {
+// 	assertPrintEqual(t, "")
+// }
 
 func TestPrintNum0(t *testing.T) {
 	assertPrintEqual(t, "0")

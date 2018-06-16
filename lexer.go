@@ -270,7 +270,7 @@ func (l *lexer) expect(s string) {
 			l.read()
 		} else {
 			t := string(l.val[len(l.val)-len(s):])
-			panic(fmt.Sprintf("FATAL: Lexer expected [%s] but got [%s].", s, t))
+			panic("FATAL: Lexer expected [" + s + "] but got [" + t + "].")
 		}
 	}
 }

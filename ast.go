@@ -11,6 +11,7 @@ type NodeType int
 const (
 	ERR_NODE NodeType = iota
 	NUM_NODE
+	STR_NODE
 	SYM_NODE
 	SXP_NODE
 	QXP_NODE
@@ -24,6 +25,8 @@ func (t NodeType) Name() string {
 		return "Error"
 	case NUM_NODE:
 		return "Number"
+	case STR_NODE:
+		return "String"
 	case SYM_NODE:
 		return "Symbol"
 	case SXP_NODE:
@@ -77,6 +80,18 @@ func parseNumber(s string) int32 {
 		n, _ = strconv.ParseInt(s, 10, 32)
 	}
 	return int32(n)
+}
+
+type strNode struct {
+	str string
+}
+
+func NewStrNode(s string) *strNode {
+	return &strNode{s}
+}
+
+func (n *strNode) Type() NodeType {
+	return STR_NODE
 }
 
 type symNode struct {

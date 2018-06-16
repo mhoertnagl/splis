@@ -4,55 +4,11 @@ import (
 	"testing"
 )
 
-func assertNum(t *testing.T, r Node, n int32) {
-	rr, ok := r.(*numNode)
-	if !ok {
-		t.Errorf("Expected type [NumNode] but got type [%v]", rr)
-	}
-	if rr.val != n {
-		t.Errorf("Expected number [%v] but got [%v]", n, rr.val)
-	}
-}
-
-func assertSym(t *testing.T, r Node, name string) {
-	rr, ok := r.(*symNode)
-	if !ok {
-		t.Errorf("Expected type [SymNode] but got type [%v]", rr)
-	}
-	if rr.name != name {
-		t.Errorf("Expected symbol name [%v] but got [%v]", name, rr.name)
-	}
-}
-
-func assertSExpr(t *testing.T, r Node, len int) SeqNode {
-	rr, ok := r.(*sExprNode)
-	if !ok {
-		t.Errorf("Expected type [SExprNode] but got type [%v]", rr)
-	}
-	if rr.Len() != len {
-		t.Errorf("Expected S-Expr length of [%v] but got [%v]", len, rr.Len())
-	}
-	return rr
-}
-
-func assertQExpr(t *testing.T, r Node, len int) SeqNode {
-	rr, ok := r.(*qExprNode)
-	if !ok {
-		t.Errorf("Expected type [QExprNode] but got type [%v]", rr)
-	}
-	if rr.Len() != len {
-		t.Errorf("Expected Q-Expr length of [%v] but got [%v]", len, rr.Len())
-	}
-	return rr
-}
-
 func TestParseEmpty(t *testing.T) {
 	l := NewLexer("")
 	p := NewParser(l)
 	r := p.Parse()
-	if r != nil {
-		t.Errorf("Expected [%v] but got [%v]", r, nil)
-	}
+	assertErr(t, r, "Unexpected end of file.")
 }
 
 func TestParseNum(t *testing.T) {
@@ -74,6 +30,20 @@ func TestParseHexNum(t *testing.T) {
 	p := NewParser(l)
 	r := p.Parse()
 	assertNum(t, r, 2748)
+}
+
+func TestParseEmptyString(t *testing.T) {
+	l := NewLexer("\"\"")
+	p := NewParser(l)
+	r := p.Parse()
+	assertStr(t, r, "")
+}
+
+func TestParseString(t *testing.T) {
+	l := NewLexer("\"abc\"")
+	p := NewParser(l)
+	r := p.Parse()
+	assertStr(t, r, "abc")
 }
 
 func TestParseSym(t *testing.T) {
@@ -175,3 +145,65 @@ func TestParseEmptyQExpr(t *testing.T) {
 // 	r := p.Parse()
 // 	assertSExpr(t, r, 0)
 // }
+
+func assertErr(t *testing.T, r Node, m string) {
+	rr, ok := r.(*errNode)
+	if !ok {
+		t.Errorf("Expected type [Error] but got type [%v]", rr)
+	}
+	if rr.msg != m {
+		t.Errorf("Expected error [%s] but got [%s]", m, rr.msg)
+	}
+}
+
+func assertNum(t *testing.T, r Node, n int32) {
+	rr, ok := r.(*numNode)
+	if !ok {
+		t.Errorf("Expected type [NumNode] but got type [%v]", rr)
+	}
+	if rr.val != n {
+		t.Errorf("Expected number [%v] but got [%v]", n, rr.val)
+	}
+}
+
+func assertStr(t *testing.T, r Node, s string) {
+	rr, ok := r.(*strNode)
+	if !ok {
+		t.Errorf("Expected type [StrNode] but got type [%v]", rr)
+	}
+	if rr.str != s {
+		t.Errorf("Expected string [%s] but got [%s]", s, rr.str)
+	}
+}
+
+func assertSym(t *testing.T, r Node, name string) {
+	rr, ok := r.(*symNode)
+	if !ok {
+		t.Errorf("Expected type [SymNode] but got type [%v]", rr)
+	}
+	if rr.name != name {
+		t.Errorf("Expected symbol name [%v] but got [%v]", name, rr.name)
+	}
+}
+
+func assertSExpr(t *testing.T, r Node, len int) SeqNode {
+	rr, ok := r.(*sExprNode)
+	if !ok {
+		t.Errorf("Expected type [SExprNode] but got type [%v]", rr)
+	}
+	if rr.Len() != len {
+		t.Errorf("Expected S-Expr length of [%v] but got [%v]", len, rr.Len())
+	}
+	return rr
+}
+
+func assertQExpr(t *testing.T, r Node, len int) SeqNode {
+	rr, ok := r.(*qExprNode)
+	if !ok {
+		t.Errorf("Expected type [QExprNode] but got type [%v]", rr)
+	}
+	if rr.Len() != len {
+		t.Errorf("Expected Q-Expr length of [%v] but got [%v]", len, rr.Len())
+	}
+	return rr
+}

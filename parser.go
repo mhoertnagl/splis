@@ -54,39 +54,19 @@ func (p *parser) seq(l string, expr func() Node, r string, n SeqNode) Node {
 func (p *parser) expr() Node {
 	switch p.cur.Kind() {
 	case EOF:
-		return nil
+		return NewErrNode("Unexpected end of file.")
 	case ERR:
-		panic("Lexer Error")
+		return NewErrNode(p.cur.Value())
 	case NUM:
 		return NewNumNode(p.cur.Value())
+	case STR:
+		return NewStrNode(p.cur.Value())
 	case SYM:
 		return NewSymNode(p.cur.Value())
 	case PAR:
-		return p.seq("(", p.expr, ")", NewSExprNode()) //p.sExpr()
+		return p.seq("(", p.expr, ")", NewSExprNode())
 	case CBR:
-		return p.seq("{", p.expr, "}", NewQExprNode()) //p.qExpr()
+		return p.seq("{", p.expr, "}", NewQExprNode())
 	}
-	return nil
+	return NewErrNode("Unrecognized token [%s].", p.cur)
 }
-
-// func (p *parser) sExpr() Node {
-// 	return p.seq("(", p.expr, ")", NewSExprNode())
-// 	// n :=
-// 	// 	p.expect("(")
-// 	// for p.nextIsNot(")") {
-// 	// 	n.Push(p.expr())
-// 	// }
-// 	// p.expect(")")
-// 	// return n
-// }
-//
-// func (p *parser) qExpr() Node {
-// 	return p.seq("{", p.expr, "}", NewQExprNode())
-// 	// n := NewQExprNode()
-// 	// p.expect("{")
-// 	// for p.nextIsNot("}") {
-// 	// 	n.Push(p.expr())
-// 	// }
-// 	// p.expect("}")
-// 	// return n
-// }
