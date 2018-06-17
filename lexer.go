@@ -137,6 +137,7 @@ func (l *lexer) Next() Token {
 		return l.Next()
 	}
 	if l.test("//") {
+		// TODO: separate function
 		l.expect("//")
 		for d := l.peek(); d != '\n' && d != eof; d = l.peek() {
 			l.skip()

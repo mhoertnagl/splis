@@ -17,7 +17,7 @@ func TestEvalSym(t *testing.T) {
 }
 
 func TestEvalUndefinedFunction(t *testing.T) {
-	assertEvalEqual(t, "(undefined)", "Unbound symbol [undefined].\n")
+	assertEvalEqual(t, "(undefined)", "Unbound symbol [undefined].")
 }
 
 func TestEvalSingleNumInSExpr(t *testing.T) {
@@ -164,6 +164,14 @@ func TestEvalEqual5f(t *testing.T) {
 	assertEvalEqual(t, "(== + <)", "0")
 }
 
+func TestEvalEqual6(t *testing.T) {
+	assertEvalEqual(t, "(== \"abc\" \"abc\")", "1")
+}
+
+func TestEvalEqual6f(t *testing.T) {
+	assertEvalEqual(t, "(== \"abc\" \"xy\")", "0")
+}
+
 func TestEvalNE(t *testing.T) {
 	assertEvalEqual(t, "(!= 0 0)", "0")
 }
@@ -225,7 +233,7 @@ func assertEvalEqual(t *testing.T, s string, e string) {
 	p := NewParser(l)
 	n := p.Parse()
 	vm := NewVM()
-	res := vm.Eval(n)
+	res := vm.Eval(n[0])
 	r := printAst(res)
 	if r != e {
 		t.Errorf("Expected [%v] but got [%v]", e, r)

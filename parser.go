@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type Parser interface {
-	Parse() Node
+	Parse() []Node
 }
 
 type parser struct {
@@ -15,9 +15,19 @@ func NewParser(lex Lexer) Parser {
 	return &parser{lex, nil}
 }
 
-func (p *parser) Parse() Node {
-	p.next()
-	return p.expr()
+// func (p *parser) Parse() Node {
+// 	p.next()
+// 	return p.expr()
+// }
+
+func (p *parser) Parse() []Node {
+	ns := []Node{}
+	for p.next(); p.cur.Kind() != EOF; p.next() {
+		n := p.expr()
+		printAst(n)
+		ns = append(ns, n)
+	}
+	return ns
 }
 
 func (p *parser) next() {
@@ -26,12 +36,11 @@ func (p *parser) next() {
 
 func (p *parser) nextIsNot(val string) bool {
 	p.next()
-	v := p.cur.Value()
 	if p.cur.Kind() == EOF {
 		fmt.Printf("Unexprected end of file. Expecting [%s].", val)
 		panic("Unexprected end of file. Expecting [" + val + "].")
 	}
-	return v != val
+	return p.cur.Value() != val
 }
 
 func (p *parser) expect(val string) {

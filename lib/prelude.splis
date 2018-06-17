@@ -1,2 +1,7 @@
 (def {true} 1)
 (def {false} 0)
+
+// Erzeugt die Funktion in einem separaten environment und damit it die Funktion
+// nicht woanders zugänglich.
+(def {fun} (lambda {f b} {
+    def (head f) (lambda (tail f) b)}))

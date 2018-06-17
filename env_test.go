@@ -45,7 +45,7 @@ func setupVM(t *testing.T, s string, q string) VM {
 	n := p.Parse()
 
 	vm := NewVM()
-	res := vm.Eval(n)
+	res := vm.Eval(n[0])
 	r := printAst(res)
 	if r != q {
 		t.Errorf("Expected [%v] but got [%v]", q, r)
@@ -57,7 +57,7 @@ func assertEnvEqual(t *testing.T, vm VM, s string, e string) {
 	l := NewLexer(s)
 	p := NewParser(l)
 	n := p.Parse()
-	res := vm.Eval(n)
+	res := vm.Eval(n[0])
 	r := printAst(res)
 	if r != e {
 		t.Errorf("Expected [%v] but got [%v]", e, r)

@@ -8,63 +8,65 @@ func TestParseEmpty(t *testing.T) {
 	l := NewLexer("")
 	p := NewParser(l)
 	r := p.Parse()
-	assertErr(t, r, "Unexpected end of file.")
+	if len(r) > 0 {
+		t.Error("Should be empty.")
+	}
 }
 
 func TestParseNum(t *testing.T) {
 	l := NewLexer("0")
 	p := NewParser(l)
 	r := p.Parse()
-	assertNum(t, r, 0)
+	assertNum(t, r[0], 0)
 }
 
 func TestParseBinNum(t *testing.T) {
 	l := NewLexer("0b101")
 	p := NewParser(l)
 	r := p.Parse()
-	assertNum(t, r, 5)
+	assertNum(t, r[0], 5)
 }
 
 func TestParseHexNum(t *testing.T) {
 	l := NewLexer("0xABC")
 	p := NewParser(l)
 	r := p.Parse()
-	assertNum(t, r, 2748)
+	assertNum(t, r[0], 2748)
 }
 
 func TestParseEmptyString(t *testing.T) {
 	l := NewLexer("\"\"")
 	p := NewParser(l)
 	r := p.Parse()
-	assertStr(t, r, "")
+	assertStr(t, r[0], "")
 }
 
 func TestParseString(t *testing.T) {
 	l := NewLexer("\"abc\"")
 	p := NewParser(l)
 	r := p.Parse()
-	assertStr(t, r, "abc")
+	assertStr(t, r[0], "abc")
 }
 
 func TestParseSym(t *testing.T) {
 	l := NewLexer("a")
 	p := NewParser(l)
 	r := p.Parse()
-	assertSym(t, r, "a")
+	assertSym(t, r[0], "a")
 }
 
 func TestParseEmptySubExpr(t *testing.T) {
 	l := NewLexer("()")
 	p := NewParser(l)
 	r := p.Parse()
-	assertSExpr(t, r, 0)
+	assertSExpr(t, r[0], 0)
 }
 
 func TestParseEmpty2SubExpr(t *testing.T) {
 	l := NewLexer("((()))")
 	p := NewParser(l)
 	r := p.Parse()
-	s0 := assertSExpr(t, r, 1)
+	s0 := assertSExpr(t, r[0], 1)
 	s1 := assertSExpr(t, s0.cells[0], 1)
 	assertSExpr(t, s1.cells[0], 0)
 }
@@ -85,7 +87,7 @@ func TestParseSingleElemSubExpr(t *testing.T) {
 	l := NewLexer("(x)")
 	p := NewParser(l)
 	r := p.Parse()
-	s := assertSExpr(t, r, 1)
+	s := assertSExpr(t, r[0], 1)
 	assertSym(t, s.cells[0], "x")
 }
 
@@ -93,7 +95,7 @@ func TestParse3ElemSubExpr(t *testing.T) {
 	l := NewLexer("(+ 5 6)")
 	p := NewParser(l)
 	r := p.Parse()
-	s := assertSExpr(t, r, 3)
+	s := assertSExpr(t, r[0], 3)
 	assertSym(t, s.cells[0], "+")
 	assertNum(t, s.cells[1], 5)
 	assertNum(t, s.cells[2], 6)
@@ -103,7 +105,7 @@ func TestParseSubElem1SubExpr(t *testing.T) {
 	l := NewLexer("(+ (* 3 4 3) 6)")
 	p := NewParser(l)
 	r := p.Parse()
-	s0 := assertSExpr(t, r, 3)
+	s0 := assertSExpr(t, r[0], 3)
 	assertSym(t, s0.cells[0], "+")
 	s1 := assertSExpr(t, s0.cells[1], 4)
 	assertSym(t, s1.cells[0], "*")
@@ -117,7 +119,7 @@ func TestParseSubElem2SubExpr(t *testing.T) {
 	l := NewLexer("(+ 4 (/ 9 3))")
 	p := NewParser(l)
 	r := p.Parse()
-	s0 := assertSExpr(t, r, 3)
+	s0 := assertSExpr(t, r[0], 3)
 	assertSym(t, s0.cells[0], "+")
 	assertNum(t, s0.cells[1], 4)
 	s1 := assertSExpr(t, s0.cells[2], 3)
@@ -126,17 +128,17 @@ func TestParseSubElem2SubExpr(t *testing.T) {
 	assertNum(t, s1.cells[2], 3)
 }
 
-func TestParseSubElemSubExpr(t *testing.T) {
-	l := NewLexer("(+ (* 1 2 3 4 5) (/ 9 (+ 2 1)))")
-	p := NewParser(l)
-	p.Parse()
-}
+// func TestParseSubElemSubExpr(t *testing.T) {
+// 	l := NewLexer("(+ (* 1 2 3 4 5) (/ 9 (+ 2 1)))")
+// 	p := NewParser(l)
+// 	p.Parse()
+// }
 
 func TestParseEmptyQExpr(t *testing.T) {
 	l := NewLexer("{}")
 	p := NewParser(l)
 	r := p.Parse()
-	assertQExpr(t, r, 0)
+	assertQExpr(t, r[0], 0)
 }
 
 // func TestParseEmptyQExpr(t *testing.T) {

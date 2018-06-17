@@ -30,7 +30,7 @@ func (e *env) Get(name string) Node {
 	if e.parent != nil {
 		return e.parent.Get(name)
 	}
-	return NewErrNode("Unbound symbol [%s].\n", name)
+	return NewErrNode("Unbound symbol [%s].", name)
 }
 
 func (e *env) Set(name string, val Node) {

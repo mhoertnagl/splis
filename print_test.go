@@ -8,7 +8,7 @@ func assertPrintEqual(t *testing.T, s string) {
 	l := NewLexer(s)
 	p := NewParser(l)
 	n := p.Parse()
-	r := printAst(n)
+	r := printAst(n[0])
 	if r != s {
 		t.Errorf("Expected [%v] but got [%v]", s, r)
 	}

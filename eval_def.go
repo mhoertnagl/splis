@@ -24,7 +24,8 @@ func (vm *vm) defVar(e Env, as []Node) Node {
 
 		s, _ := p.(*symNode)
 		v := vm.eval(e, as[i+1])
-		e.Set(s.name, v)
+		//e.Set(s.name, v)
+		vm.env.Set(s.name, v)
 	}
 
 	return NewSExprNode()

@@ -56,6 +56,8 @@ func (vm *vm) evalEQ2(e Env, x Node, y Node) bool {
 		return vm.evalErrEQ(e, x.(*errNode), y.(*errNode))
 	case NUM_NODE:
 		return vm.evalNumEQ(e, x.(*numNode), y.(*numNode))
+	case STR_NODE:
+		return vm.evalStrEQ(e, x.(*strNode), y.(*strNode))
 	case SYM_NODE:
 		return vm.evalSymEQ(e, x.(*symNode), y.(*symNode))
 	case SXP_NODE:
@@ -76,6 +78,10 @@ func (vm *vm) evalErrEQ(e Env, x *errNode, y *errNode) bool {
 
 func (vm *vm) evalNumEQ(e Env, x *numNode, y *numNode) bool {
 	return x.val == y.val
+}
+
+func (vm *vm) evalStrEQ(e Env, x *strNode, y *strNode) bool {
+	return x.str == y.str
 }
 
 func (vm *vm) evalSymEQ(e Env, x *symNode, y *symNode) bool {
