@@ -150,6 +150,40 @@ func TestLexComment3(t *testing.T) {
 		NewToken(EOF, "", NewPos(1, 1)))
 }
 
+func TestLexMLComment1(t *testing.T) {
+	assertLexSeq(t, "/* Test\nTest */",
+		NewToken(EOF, "", NewPos(1, 1)))
+}
+
+func TestLexMLComment2(t *testing.T) {
+	assertLexSeq(t, "1 /* Test\nTest */",
+		NewToken(NUM, "1", NewPos(1, 1)),
+		NewToken(EOF, "", NewPos(1, 1)))
+}
+
+func TestLexMLComment3(t *testing.T) {
+	assertLexSeq(t, "/* Test\nTest */ 1",
+		NewToken(NUM, "1", NewPos(1, 1)),
+		NewToken(EOF, "", NewPos(1, 1)))
+}
+
+func TestLexMLComment4(t *testing.T) {
+	assertLexSeq(t, "/* Test\nTest */ 1 /* Test */ 2",
+		NewToken(NUM, "1", NewPos(1, 1)),
+		NewToken(NUM, "2", NewPos(1, 1)),
+		NewToken(EOF, "", NewPos(1, 1)))
+}
+
+func TestLexMLComment5(t *testing.T) {
+	assertLexSeq(t, "/* Test\nTest ",
+		NewToken(ERR, "Stray multi line comment. Missing [*/].", NewPos(1, 1)))
+}
+
+func TestLexUnrecognized(t *testing.T) {
+	assertLexSeq(t, "\f",
+		NewToken(ERR, "Unrecognized character [].", NewPos(1, 1)))
+}
+
 func assertLex(t *testing.T, a Token, e Token) {
 	if a.Kind() != e.Kind() {
 		t.Errorf("Unexpected token kind [%d]. Expecting kind [%d]", a.Kind(), e.Kind())

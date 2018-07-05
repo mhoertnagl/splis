@@ -137,12 +137,11 @@ func (l *lexer) Next() Token {
 		return l.Next()
 	}
 	if l.test("//") {
-		// TODO: separate function
-		l.expect("//")
-		for d := l.peek(); d != '\n' && d != eof; d = l.peek() {
-			l.skip()
-		}
+		l.readWhile(not(isNewline))
 		return l.Next()
+	}
+	if l.test("/*") {
+		return l.skipMultiLineComment("/*", "*/")
 	}
 	if isDec(c) {
 		return l.nextNum()
@@ -150,7 +149,18 @@ func (l *lexer) Next() Token {
 	if isSym(c) {
 		return l.nextSymbol()
 	}
-	return nil
+	return l.err("Unrecognized character [%s].", string(c))
+}
+
+func (l *lexer) skipMultiLineComment(start string, end string) Token {
+	l.expect(start)
+	for l.test(end) == false {
+		if l.read() == eof {
+			return l.err("Stray multi line comment. Missing [%s].", end)
+		}
+	}
+	l.expect(end)
+	return l.Next()
 }
 
 // nextNum accepts numbers of the following patterns:
@@ -296,9 +306,19 @@ func (l *lexer) err(msg string, args ...interface{}) Token {
 	return NewToken(ERR, fmt.Sprintf(msg, args...), NewPos(l.line, l.col))
 }
 
+// not returns true iff the function f returns false and vice versa.
+func not(f func(rune) bool) func(rune) bool {
+	return func(c rune) bool { return f(c) == false }
+}
+
 // isWhitespace returns true iff the rune is one of [ \t\r\n].
 func isWhitespace(c rune) bool {
 	return strings.ContainsRune(" \t\r\n", c)
+}
+
+// isNewline returns true iff the rune is '\n'.
+func isNewline(c rune) bool {
+	return c == '\n'
 }
 
 // isDec returns true iff the rune is a decimal digit.

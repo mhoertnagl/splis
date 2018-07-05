@@ -1,7 +1,46 @@
+/**
+ * Atomic values of truth. The mnemonics true and false are nothing but the
+ * numeric values 1 and 0 respectively.
+ */
 (def {true} 1)
 (def {false} 0)
 
-// Erzeugt die Funktion in einem separaten environment und damit it die Funktion
-// nicht woanders zugänglich.
+/**
+ * The empty list.
+ */
+(def {nil} {})
+
+; Erzeugt die Funktion in einem separaten environment und damit it die Funktion
+; nicht woanders zugänglich. LÖSUNG: def global, var lokal. 
+/**
+ * Defines a new global function. The head of argument f will be the function
+ * name while the remaining elements of f will be the argument names. 
+ *    The argument b is the body implementation of f.
+ *
+ * @param f  Q-List with the function name as its first argument followed by an 
+ *           arbitrary number of function argument names.
+ * @param b  Q-Expression of the body implementing the function f. 
+ */
 (def {fun} (lambda {f b} {
-    def (head f) (lambda (tail f) b)}))
+  def (head f) (lambda (tail f) b)}))
+
+/**
+ * Loads and executes a splis module.
+ *
+ * @param m  String path to module file.
+ */
+(fun {import m} {
+  (execute (load m))})
+    
+/**
+ * Applies a unary function f to every element in list l and returns a new list 
+ * of the evaluation results in the same order as the arguments in l.
+ *
+ * @param f  Unary function.
+ * @param l  List of elements applicable to f.
+ * @returns  New list containing the evaluation results of each element.
+ */     
+(fun {map f l} {
+  if (== l nil)
+    {nil}
+    {:: (f (head l)) (map f (tail l))}})
