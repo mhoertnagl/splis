@@ -35,7 +35,7 @@ func (vm *vm) evalLambda(n *lambdaNode, as []Node) Node {
 	// We cannot apply more arguments than there are parameters for the
 	// function.
 	if plen < alen {
-		return NewErrNode("Too many arguments [%v].\n", printAst(n))
+		return NewErrNode("Too many arguments [%v].", printAst(n))
 	}
 
 	for _, a := range as {

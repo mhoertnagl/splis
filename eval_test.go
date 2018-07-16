@@ -17,11 +17,15 @@ func TestEvalSym(t *testing.T) {
 }
 
 func TestEvalUndefinedFunction(t *testing.T) {
-	assertEvalEqual(t, "(undefined)", "Unbound symbol [undefined].")
+	assertEvalEqual(t, "(undefined)", "Error: Unbound symbol [undefined].\n")
 }
 
 func TestEvalSingleNumInSExpr(t *testing.T) {
 	assertEvalEqual(t, "(1)", "1")
+}
+
+func TestEvalSum0(t *testing.T) {
+	assertEvalEqual(t, "(+)", "0")
 }
 
 func TestEvalSum1(t *testing.T) {
@@ -41,7 +45,51 @@ func TestEvalSum4(t *testing.T) {
 }
 
 func TestEvalSum1f(t *testing.T) {
-	assertEvalEqual(t, "(+ 1 {})", "Cannot add non-number [{}].\n")
+	assertEvalEqual(t, "(+ 1 {})", "Error: Argument of + must be of type [Number] but is [Q-Expression].\n")
+}
+
+func TestEvalDiff0(t *testing.T) {
+	assertEvalEqual(t, "(-)", "0")
+}
+
+func TestEvalDiff1(t *testing.T) {
+	assertEvalEqual(t, "(- 5)", "-5")
+}
+
+func TestEvalDiff2(t *testing.T) {
+	assertEvalEqual(t, "(- 5 2)", "3")
+}
+
+func TestEvalDiff3(t *testing.T) {
+	assertEvalEqual(t, "(- 5 2 3)", "0")
+}
+
+func TestEvalMul0(t *testing.T) {
+	assertEvalEqual(t, "(*)", "1")
+}
+
+func TestEvalMul1(t *testing.T) {
+	assertEvalEqual(t, "(* 5)", "5")
+}
+
+func TestEvalMul2(t *testing.T) {
+	assertEvalEqual(t, "(* 5 3)", "15")
+}
+
+func TestEvalDiv0(t *testing.T) {
+	assertEvalEqual(t, "(/)", "1")
+}
+
+func TestEvalDiv1(t *testing.T) {
+	assertEvalEqual(t, "(/ 5)", "0")
+}
+
+func TestEvalDiv2(t *testing.T) {
+	assertEvalEqual(t, "(/ 10 2)", "5")
+}
+
+func TestEvalDiv3(t *testing.T) {
+	assertEvalEqual(t, "(/ 15 3 5)", "1")
 }
 
 func TestInvariantQExpr(t *testing.T) {
@@ -61,15 +109,15 @@ func TestLT2(t *testing.T) {
 }
 
 func TestLT3(t *testing.T) {
-	assertEvalEqual(t, "(< 1 0 0)", "< requires exactly [2] arguments.\n")
+	assertEvalEqual(t, "(< 1 0 0)", "Error: < requires exactly [2] arguments.\n")
 }
 
 func TestLT4(t *testing.T) {
-	assertEvalEqual(t, "(< {} 0)", "First argument of < must be of type [Number] but is [Q-Expression].\n")
+	assertEvalEqual(t, "(< {} 0)", "Error: First argument of < must be of type [Number] but is [Q-Expression].\n")
 }
 
 func TestLT5(t *testing.T) {
-	assertEvalEqual(t, "(< 1 {})", "Second argument of < must be of type [Number] but is [Q-Expression].\n")
+	assertEvalEqual(t, "(< 1 {})", "Error: Second argument of < must be of type [Number] but is [Q-Expression].\n")
 }
 
 func TestEvalNum2(t *testing.T) {
@@ -105,7 +153,7 @@ func TestEvalPartialLambda(t *testing.T) {
 }
 
 func TestEvalTooManyArgsLambda(t *testing.T) {
-	assertEvalEqual(t, "((lambda {a b} {+ a b}) 1 2 3)", "Too many arguments [(lambda {a b} {+ a b})].\n")
+	assertEvalEqual(t, "((lambda {a b} {+ a b}) 1 2 3)", "Error: Too many arguments [(lambda {a b} {+ a b})].\n")
 }
 
 func TestEvalEqual0(t *testing.T) {
@@ -189,15 +237,19 @@ func TestEvalIf2(t *testing.T) {
 }
 
 func TestEvalIff1(t *testing.T) {
-	assertEvalEqual(t, "(if a {+ 1 2} {4})", "First argument of if must be of type [Number] but is [Error].\n")
+	assertEvalEqual(t, "(if a {+ 1 2} {4})", "Error: First argument of if must be of type [Number] but is [Error].\n")
 }
 
 func TestEvalIff2(t *testing.T) {
-	assertEvalEqual(t, "(if (< 1 2) (+ 1 2) {4})", "Second argument of if must be of type [Q-Expression] but is [Number].\n")
+	assertEvalEqual(t, "(if (< 1 2) (+ 1 2) {4})", "Error: Second argument of if must be of type [Q-Expression] but is [Number].\n")
 }
 
 func TestEvalIff3(t *testing.T) {
-	assertEvalEqual(t, "(if (< 1 2) {+ 1 2} 4)", "Third argument of if must be of type [Q-Expression] but is [Number].\n")
+	assertEvalEqual(t, "(if (< 1 2) {+ 1 2} 4)", "Error: Third argument of if must be of type [Q-Expression] but is [Number].\n")
+}
+
+func TestEvalAnd0(t *testing.T) {
+	assertEvalEqual(t, "(&&)", "1")
 }
 
 func TestEvalAnd1(t *testing.T) {
@@ -220,12 +272,52 @@ func TestEvalAnd5(t *testing.T) {
 	assertEvalEqual(t, "(&& (< 1 2) (< 3 2))", "0")
 }
 
+func TestEvalOr0(t *testing.T) {
+	assertEvalEqual(t, "(||)", "0")
+}
+
+func TestEvalOr1(t *testing.T) {
+	assertEvalEqual(t, "(|| (< 1 2))", "1")
+}
+
+func TestEvalOr2(t *testing.T) {
+	assertEvalEqual(t, "(|| (< 2 1))", "0")
+}
+
+func TestEvalOr3(t *testing.T) {
+	assertEvalEqual(t, "(|| (< 1 2) (< 2 3))", "1")
+}
+
+func TestEvalOr4(t *testing.T) {
+	assertEvalEqual(t, "(|| (< 1 2) (< 3 2))", "1")
+}
+
+func TestEvalOr5(t *testing.T) {
+	assertEvalEqual(t, "(|| (< 2 1) (< 3 2))", "0")
+}
+
+func TestEvalNot1(t *testing.T) {
+	assertEvalEqual(t, "(! (< 1 2))", "0")
+}
+
+func TestEvalNot2(t *testing.T) {
+	assertEvalEqual(t, "(! (< 2 1))", "1")
+}
+
 func TestEvalLoad(t *testing.T) {
 	assertEvalEqual(t, "(load \"test/load.splis\")", "\"(def {x} 1)\"")
 }
 
 func TestEvalExecute(t *testing.T) {
 	assertEvalEqual(t, "(execute \"(+ 1 4)\")", "5")
+}
+
+func TestEvalPrint(t *testing.T) {
+	assertEvalEqual(t, "(print \"a\" \"b\" \"c\\n\")", "()")
+}
+
+func TestEvalError(t *testing.T) {
+	assertEvalEqual(t, "(error \"Oops\")", "Error: Oops\n")
 }
 
 func assertEvalEqual(t *testing.T, s string, e string) {

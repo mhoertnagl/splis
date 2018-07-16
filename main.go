@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+// TODO: Floating point numbers statt integer?
+// TODO: Boolean type.
+// TODO: List primitives.
+// TODO: Erzeugt die Funktion in einem separaten environment und damit
+//       ist die Funktion nicht woanders zugänglich. LÖSUNG: def global,
+//       var lokal.
+// TODO: do primitive?
+// TODO: cond primitive?
+// TODO: dedicated node to return success.
+
 func main() {
 
 	reader := bufio.NewReader(os.Stdin)

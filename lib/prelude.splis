@@ -10,8 +10,6 @@
  */
 (def {nil} {})
 
-; Erzeugt die Funktion in einem separaten environment und damit it die Funktion
-; nicht woanders zugänglich. LÖSUNG: def global, var lokal. 
 /**
  * Defines a new global function. The head of argument f will be the function
  * name while the remaining elements of f will be the argument names. 
@@ -25,12 +23,49 @@
   def (head f) (lambda (tail f) b)}))
 
 /**
+ * Defines a new local environment. Variable bindings inside this scope Will not
+ * be accessible outhside the let expression.
+ *
+ * @param b  @-Expression of the body to be evaluated inside the new local
+ *           environment.
+ */
+(fun {let b} {lambda {} b})
+
+/**
  * Loads and executes a splis module.
  *
  * @param m  String path to module file.
  */
-(fun {import m} {
-  (execute (load m))})
+(fun {import m} {execute (load m)})
+
+/**
+ * Returns true iff the list l is empty.
+ */
+(fun {nil? l} {== l nil})
+
+/**
+ * Returns the length of the list l. Requires time proportional to O(n). 
+ *
+ * @param l  A list.
+ * @returns  The number of elements in list l.
+ */
+(fun {len l} {
+  //if (== l nil)
+  if (nil? l)
+    {0}
+    {+ 1 (len (tail l))}})
+
+/**
+ * Reverses the list l.
+ *
+ * @param l  A list.
+ * @returns  New list containing the elements of list l in reversed order.
+ */
+(fun {rev l} {
+  //if (== l nil)
+  if (nil? l)
+    {nil}
+    {:: (rev (tail l)) (head l)}})
     
 /**
  * Applies a unary function f to every element in list l and returns a new list 
@@ -41,6 +76,7 @@
  * @returns  New list containing the evaluation results of each element.
  */     
 (fun {map f l} {
-  if (== l nil)
+  //if (== l nil)
+  if (nil? l)
     {nil}
     {:: (f (head l)) (map f (tail l))}})

@@ -8,7 +8,7 @@ import (
 func printAst(n Node) string {
 	switch v := n.(type) {
 	case *errNode:
-		return v.msg
+		return fmt.Sprintf("Error: %s\n", v.msg)
 	case *numNode:
 		return fmt.Sprintf("%d", v.val)
 	case *strNode:

@@ -14,19 +14,19 @@ func TestEvalEnv2(t *testing.T) {
 }
 
 func TestEvalEnv3(t *testing.T) {
-	setupVM(t, "(def {a} 50 200)", "Number of names [1] and definitions [2] must be equal.\n")
+	setupVM(t, "(def {a} 50 200)", "Error: Number of names [1] and definitions [2] must be equal.\n")
 }
 
 func TestEvalEnv4(t *testing.T) {
-	setupVM(t, "(def {a b} 50)", "Number of names [2] and definitions [1] must be equal.\n")
+	setupVM(t, "(def {a b} 50)", "Error: Number of names [2] and definitions [1] must be equal.\n")
 }
 
 func TestEvalEnv5(t *testing.T) {
-	setupVM(t, "(def {5 b} 50 50)", "Def parameter must be of type [Symbol] but is [Number].\n")
+	setupVM(t, "(def {5 b} 50 50)", "Error: Def parameter must be of type [Symbol] but is [Number].\n")
 }
 
 func TestEvalEnv6(t *testing.T) {
-	setupVM(t, "(def {a})", "Def requires at least [2] arguments.\n")
+	setupVM(t, "(def {a})", "Error: Def requires at least [2] arguments.\n")
 }
 
 // func TestEvalEnv6(t *testing.T) {
