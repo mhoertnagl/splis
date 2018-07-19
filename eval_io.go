@@ -17,7 +17,8 @@ func (vm *vm) evalLoad(e Env, as []Node) Node {
 	}
 
 	p := as[0].(*strNode)
-	buf, err := ioutil.ReadFile(p.str)
+	f := fmt.Sprintf("%s.splis", p.str)
+	buf, err := ioutil.ReadFile(f)
 
 	if err != nil {
 		return NewErrNode("%s", err)
@@ -40,7 +41,14 @@ func (vm *vm) evalExecute(e Env, as []Node) Node {
 	l := NewLexer(s.str)
 	p := NewParser(l)
 	ns := p.Parse()
-	return vm.eval(e, ns[0])
+	if len(ns) > 0 {
+		var r Node = nil
+		for _, n := range ns {
+			r = vm.eval(e, n)
+		}
+		return r
+	}
+	return NewSExprNode()
 }
 
 func (vm *vm) evalPrint(e Env, as []Node) Node {

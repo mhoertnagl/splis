@@ -71,17 +71,19 @@ func TestParseEmpty2SubExpr(t *testing.T) {
 	assertSExpr(t, s1.cells[0], 0)
 }
 
-// func TestParseIncompleteEmptySubExpr1(t *testing.T) {
-// 	l := NewLexer("(")
-// 	p := NewParser(l)
-// 	p.Parse()
-// }
+func TestParseIncompleteEmptySubExpr1(t *testing.T) {
+	l := NewLexer("(")
+	p := NewParser(l)
+	r := p.Parse()
+	assertErr(t, r[0], "Stray open [(]. Missing corresponding closing [)].")
+}
 
-// func TestParseIncompleteEmptySubExpr2(t *testing.T) {
-// 	l := NewLexer(")")
-// 	p := NewParser(l)
-// 	p.Parse()
-// }
+func TestParseIncompleteEmptySubExpr2(t *testing.T) {
+	l := NewLexer(")")
+	p := NewParser(l)
+	r := p.Parse()
+	assertErr(t, r[0], "Stray closing [)]. Missing corresponding open [(].")
+}
 
 func TestParseSingleElemSubExpr(t *testing.T) {
 	l := NewLexer("(x)")

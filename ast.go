@@ -44,6 +44,7 @@ func (t NodeType) Name() string {
 
 type Node interface {
 	Type() NodeType
+	Copy() Node
 }
 
 type errNode struct {
@@ -58,16 +59,29 @@ func (n *errNode) Type() NodeType {
 	return ERR_NODE
 }
 
+func (n *errNode) Copy() Node {
+	return n
+}
+
 type numNode struct {
 	val int32
 }
 
-func NewNumNode(s string) *numNode {
-	return &numNode{parseNumber(s)}
+func NewNumNodeFromString(s string) *numNode {
+	return NewNumNode(parseNumber(s))
+}
+
+func NewNumNode(n int32) *numNode {
+	return &numNode{n}
 }
 
 func (n *numNode) Type() NodeType {
 	return NUM_NODE
+}
+
+// Numbers are immutable?
+func (n *numNode) Copy() Node {
+	return NewNumNode(n.val)
 }
 
 func parseNumber(s string) int32 {
@@ -86,12 +100,17 @@ type strNode struct {
 	str string
 }
 
+// Strings are immutable?
 func NewStrNode(s string) *strNode {
 	return &strNode{s}
 }
 
 func (n *strNode) Type() NodeType {
 	return STR_NODE
+}
+
+func (n *strNode) Copy() Node {
+	return NewStrNode(n.str)
 }
 
 type symNode struct {
@@ -104,6 +123,11 @@ func NewSymNode(s string) *symNode {
 
 func (n *symNode) Type() NodeType {
 	return SYM_NODE
+}
+
+// Symbols are immutable?
+func (n *symNode) Copy() Node {
+	return NewSymNode(n.name)
 }
 
 type seqNode struct {
@@ -121,6 +145,14 @@ func NewQExprNode() *seqNode {
 
 func (n *seqNode) Type() NodeType {
 	return n.typ
+}
+
+func (n *seqNode) Copy() Node {
+	m := &seqNode{n.typ, []Node{}}
+	for _, c := range n.cells {
+		m.Push(c.Copy())
+	}
+	return m
 }
 
 func (n *seqNode) Push(c Node) {
@@ -141,6 +173,11 @@ func (n *funNode) Type() NodeType {
 	return FUN_NODE
 }
 
+func (n *funNode) Copy() Node {
+	// FunNode is immutable.
+	return n
+}
+
 type lambdaNode struct {
 	env  Env
 	ps   []*symNode
@@ -153,6 +190,14 @@ func NewLambdaNode(e Env, ps []*symNode, body *seqNode) *lambdaNode {
 
 func (n *lambdaNode) Type() NodeType {
 	return LBD_NODE
+}
+
+func (n *lambdaNode) Copy() Node {
+	m := NewLambdaNode(n.env.Copy(), []*symNode{}, n.body.Copy().(*seqNode))
+	for _, p := range n.ps {
+		m.ps = append(m.ps, p.Copy().(*symNode))
+	}
+	return m
 }
 
 func (n *lambdaNode) Pop() *symNode {

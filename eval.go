@@ -2,6 +2,7 @@ package main
 
 type VM interface {
 	Eval(n Node) Node
+	Load(f string)
 }
 
 type vm struct {
@@ -23,6 +24,10 @@ func NewVM() VM {
 	e.SetFun("def", vm.evalDef)
 	e.SetFun("var", vm.evalVar)
 	e.SetFun("eval", vm.evalEval)
+	e.SetFun("list", vm.evalList)
+	e.SetFun("join", vm.evalJoin)
+	e.SetFun("head", vm.evalHead)
+	e.SetFun("tail", vm.evalTail)
 	e.SetFun("lambda", vm.makeLambda)
 	e.SetFun("if", vm.evalIf)
 	e.SetFun("&&", vm.evalAnd)
@@ -35,10 +40,14 @@ func NewVM() VM {
 	return vm
 }
 
-// TODO: Bis auf diese Funktion muss nichts an VM hängen.
-
 func (vm *vm) Eval(n Node) Node {
 	return vm.eval(vm.env, n)
+}
+
+func (vm *vm) Load(f string) {
+	fs := []Node{NewStrNode(f)}
+	cs := []Node{vm.evalLoad(vm.env, fs)}
+	vm.evalExecute(vm.env, cs)
 }
 
 func (vm *vm) eval(e Env, n Node) Node {

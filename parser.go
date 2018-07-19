@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type Parser interface {
 	Parse() []Node
 }
@@ -14,11 +12,6 @@ type parser struct {
 func NewParser(lex Lexer) Parser {
 	return &parser{lex, nil}
 }
-
-// func (p *parser) Parse() Node {
-// 	p.next()
-// 	return p.expr()
-// }
 
 func (p *parser) Parse() []Node {
 	ns := []Node{}
@@ -36,28 +29,25 @@ func (p *parser) next() {
 
 func (p *parser) nextIsNot(val string) bool {
 	p.next()
-	if p.cur.Kind() == EOF {
-		fmt.Printf("Unexprected end of file. Expecting [%s].", val)
-		panic("Unexprected end of file. Expecting [" + val + "].")
-	}
-	return p.cur.Value() != val
+	return p.cur.Kind() != EOF && p.cur.Value() != val
 }
 
-func (p *parser) expect(val string) {
-	v := p.cur.Value()
-	if v != val {
-		fmt.Printf("Expecting [%s] but got [%s].\n", val, v)
-		panic("Expecting [" + val + "] but got [" + v + "].")
-	}
+func (p *parser) expect(val string) bool {
+	return p.cur.Value() == val
 }
 
 func (p *parser) seq(l string, expr func() Node, r string, n *seqNode) Node {
+	if p.expect(r) {
+		return NewErrNode("Stray closing [%s]. Missing corresponding open [%s].", r, l)
+	}
 	p.expect(l)
 	for p.nextIsNot(r) {
 		n.Push(expr())
 	}
-	p.expect(r)
-	return n
+	if p.expect(r) {
+		return n
+	}
+	return NewErrNode("Stray open [%s]. Missing corresponding closing [%s].", l, r)
 }
 
 func (p *parser) expr() Node {
@@ -67,7 +57,7 @@ func (p *parser) expr() Node {
 	case ERR:
 		return NewErrNode(p.cur.Value())
 	case NUM:
-		return NewNumNode(p.cur.Value())
+		return NewNumNodeFromString(p.cur.Value())
 	case STR:
 		return NewStrNode(p.cur.Value())
 	case SYM:

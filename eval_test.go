@@ -140,6 +140,98 @@ func TestEvalQExpr(t *testing.T) {
 	assertEvalEqual(t, "(eval {+ 1 1})", "2")
 }
 
+func TestEvalList0(t *testing.T) {
+	assertEvalEqual(t, "(list)", "{}")
+}
+
+func TestEvalList1(t *testing.T) {
+	assertEvalEqual(t, "(list 1)", "{1}")
+}
+
+func TestEvalList2(t *testing.T) {
+	assertEvalEqual(t, "(list 1 {a})", "{1 {a}}")
+}
+
+func TestEvalHead0(t *testing.T) {
+	assertEvalEqual(t, "(head {})", "Error: List provided to head requires at least [1] arguments.\n")
+}
+
+func TestEvalHead1(t *testing.T) {
+	assertEvalEqual(t, "(head {} {})", "Error: Head requires exactly [1] arguments.\n")
+}
+
+func TestEvalHead2(t *testing.T) {
+	assertEvalEqual(t, "(head 1)", "Error: Argument of head must be of type [Q-Expression] but is [Number].\n")
+}
+
+func TestEvalHead3(t *testing.T) {
+	assertEvalEqual(t, "(head {1})", "{1}")
+}
+
+func TestEvalHead4(t *testing.T) {
+	assertEvalEqual(t, "(head {1 2})", "{1}")
+}
+
+func TestEvalTail0(t *testing.T) {
+	assertEvalEqual(t, "(tail {})", "Error: List provided to tail requires at least [1] arguments.\n")
+}
+
+func TestEvalTail1(t *testing.T) {
+	assertEvalEqual(t, "(tail {} {})", "Error: Tail requires exactly [1] arguments.\n")
+}
+
+func TestEvalTail2(t *testing.T) {
+	assertEvalEqual(t, "(tail 1)", "Error: Argument of tail must be of type [Q-Expression] but is [Number].\n")
+}
+
+func TestEvalTail3(t *testing.T) {
+	assertEvalEqual(t, "(tail {1})", "{}")
+}
+
+func TestEvalTail4(t *testing.T) {
+	assertEvalEqual(t, "(tail {1 2})", "{2}")
+}
+
+func TestEvalTail5(t *testing.T) {
+	assertEvalEqual(t, "(tail {1 2 3})", "{2 3}")
+}
+
+func TestEvalJoin0(t *testing.T) {
+	assertEvalEqual(t, "(join)", "{}")
+}
+
+func TestEvalJoin1(t *testing.T) {
+	assertEvalEqual(t, "(join {})", "{}")
+}
+
+func TestEvalJoin2(t *testing.T) {
+	assertEvalEqual(t, "(join {} {})", "{}")
+}
+
+func TestEvalJoin3(t *testing.T) {
+	assertEvalEqual(t, "(join {a} {})", "{a}")
+}
+
+func TestEvalJoin4(t *testing.T) {
+	assertEvalEqual(t, "(join {} {b})", "{b}")
+}
+
+func TestEvalJoin5(t *testing.T) {
+	assertEvalEqual(t, "(join {a} {b})", "{a b}")
+}
+
+func TestEvalJoin6(t *testing.T) {
+	assertEvalEqual(t, "(join {a b} {c})", "{a b c}")
+}
+
+func TestEvalJoin7(t *testing.T) {
+	assertEvalEqual(t, "(join {a} {b c})", "{a b c}")
+}
+
+func TestEvalJoin8(t *testing.T) {
+	assertEvalEqual(t, "(join {a b} {c d})", "{a b c d}")
+}
+
 func TestEvalIDLambda(t *testing.T) {
 	assertEvalEqual(t, "((lambda {a} {a}) 666)", "666")
 }
@@ -236,6 +328,10 @@ func TestEvalIf2(t *testing.T) {
 	assertEvalEqual(t, "(if (< 2 1) {+ 1 2} {4})", "4")
 }
 
+func TestEvalIf3(t *testing.T) {
+	assertEvalEqual(t, "(if (< 2 1) {+ 1 2} {+ 4 1})", "5")
+}
+
 func TestEvalIff1(t *testing.T) {
 	assertEvalEqual(t, "(if a {+ 1 2} {4})", "Error: First argument of if must be of type [Number] but is [Error].\n")
 }
@@ -305,12 +401,28 @@ func TestEvalNot2(t *testing.T) {
 }
 
 func TestEvalLoad(t *testing.T) {
-	assertEvalEqual(t, "(load \"test/load.splis\")", "\"(def {x} 1)\"")
+	assertEvalEqual(t, "(load \"test/load\")", "\"(def {x} 1)\"")
 }
 
 func TestEvalExecute(t *testing.T) {
 	assertEvalEqual(t, "(execute \"(+ 1 4)\")", "5")
 }
+
+func TestEvalExecute1(t *testing.T) {
+	assertEvalEqual(t, "(execute \"/**\n* Hallo */\")", "()")
+}
+
+func TestEvalExecute2(t *testing.T) {
+	assertEvalEqual(t, "(execute \"/**\n* Hallo */ 1\")", "1")
+}
+
+func TestEvalExecute3(t *testing.T) {
+	assertEvalEqual(t, "(execute \"/**\n* Hallo */ 1 3\")", "3")
+}
+
+// func TestEvalExecute99(t *testing.T) {
+// 	assertEvalEqual(t, "(execute (load \"lib/prelude.splis\"))", "5")
+// }
 
 func TestEvalPrint(t *testing.T) {
 	assertEvalEqual(t, "(print \"a\" \"b\" \"c\\n\")", "()")
@@ -318,6 +430,26 @@ func TestEvalPrint(t *testing.T) {
 
 func TestEvalError(t *testing.T) {
 	assertEvalEqual(t, "(error \"Oops\")", "Error: Oops\n")
+}
+
+func TestEvalMixed1(t *testing.T) {
+	assertEvalEqual(t, "(head (tail (list 1 2 3 4 5)))", "{2}")
+}
+
+func TestEvalMixed2(t *testing.T) {
+	assertEvalEqual(t, "(head (tail (tail (list 1 2 3 4 5))))", "{3}")
+}
+
+func TestEvalMixed3(t *testing.T) {
+	// s := `
+	// (def {len} (lambda {l} {
+	//   if (== l {})
+	//     {0}
+	//     {+ 1 (len (tail l))}}))
+	//
+	// (len {1})
+	// `
+	assertEvalEqual(t, `(execute (load "test/debug"))`, "1")
 }
 
 func assertEvalEqual(t *testing.T, s string, e string) {

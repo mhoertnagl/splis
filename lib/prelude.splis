@@ -50,7 +50,6 @@
  * @returns  The number of elements in list l.
  */
 (fun {len l} {
-  //if (== l nil)
   if (nil? l)
     {0}
     {+ 1 (len (tail l))}})
@@ -62,10 +61,9 @@
  * @returns  New list containing the elements of list l in reversed order.
  */
 (fun {rev l} {
-  //if (== l nil)
   if (nil? l)
     {nil}
-    {:: (rev (tail l)) (head l)}})
+    {join (rev (tail l)) (head l)}})
     
 /**
  * Applies a unary function f to every element in list l and returns a new list 
@@ -76,7 +74,6 @@
  * @returns  New list containing the evaluation results of each element.
  */     
 (fun {map f l} {
-  //if (== l nil)
   if (nil? l)
     {nil}
-    {:: (f (head l)) (map f (tail l))}})
+    {join (f (head l)) (map f (tail l))}})

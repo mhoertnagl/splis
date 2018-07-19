@@ -10,7 +10,7 @@ func (vm *vm) evalAdd(e Env, as []Node) Node {
 		v := as[i].(*numNode)
 		sum += v.val
 	}
-	return &numNode{sum}
+	return NewNumNode(sum)
 }
 
 func (vm *vm) evalSub(e Env, as []Node) Node {
@@ -21,7 +21,7 @@ func (vm *vm) evalSub(e Env, as []Node) Node {
 			return t.Error()
 		}
 		v := as[0].(*numNode)
-		return &numNode{-v.val}
+		return NewNumNode(-v.val)
 	}
 	if len(as) > 1 {
 		if t.AssertType(as[0], NUM_NODE, "Argument of -") {
@@ -37,7 +37,7 @@ func (vm *vm) evalSub(e Env, as []Node) Node {
 		v := as[i].(*numNode)
 		diff -= v.val
 	}
-	return &numNode{diff}
+	return NewNumNode(diff)
 }
 
 func (vm *vm) evalMul(e Env, as []Node) Node {
@@ -50,7 +50,7 @@ func (vm *vm) evalMul(e Env, as []Node) Node {
 		v := as[i].(*numNode)
 		prod *= v.val
 	}
-	return &numNode{prod}
+	return NewNumNode(prod)
 }
 
 func (vm *vm) evalDiv(e Env, as []Node) Node {
@@ -64,7 +64,7 @@ func (vm *vm) evalDiv(e Env, as []Node) Node {
 		if t.AssertDivisble(v.val) {
 			return t.Error()
 		}
-		return &numNode{1 / v.val}
+		return NewNumNode(1 / v.val)
 	}
 	if len(as) > 1 {
 		if t.AssertType(as[0], NUM_NODE, "Argument of /") {
@@ -86,5 +86,5 @@ func (vm *vm) evalDiv(e Env, as []Node) Node {
 		}
 		div /= v.val
 	}
-	return &numNode{div}
+	return NewNumNode(div)
 }

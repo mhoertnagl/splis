@@ -2,7 +2,9 @@ package main
 
 func (vm *vm) makeLambda(e Env, as []Node) Node {
 	t := NewAssertion()
-	t.AssertLen(as, 2, "lambda")
+	if t.AssertLen(as, 2, "lambda") {
+		return t.Error()
+	}
 	t.AssertType(as[0], QXP_NODE, "First argument of lambda")
 	t.AssertType(as[1], QXP_NODE, "Second argument of lambda")
 
@@ -38,20 +40,22 @@ func (vm *vm) evalLambda(n *lambdaNode, as []Node) Node {
 		return NewErrNode("Too many arguments [%v].", printAst(n))
 	}
 
+	m := n.Copy().(*lambdaNode)
+
 	for _, a := range as {
 		// Pop the first parameter of the function.
-		h := n.Pop()
+		h := m.Pop()
 		// Evaluate the argument and bind the result to the parameter.
-		v := vm.eval(n.env, a)
-		n.env.Set(h.name, v)
+		v := vm.eval(m.env, a)
+		m.env.Set(h.name, v)
 	}
 
 	// There are fewer arguments then function parameters. Return the function
 	// and its environment with available arguments bound.
 	if plen > alen {
-		return n
+		return m
 	}
 	// All parameters are bound and the lambda function can be evaluated.
-	n.body.typ = SXP_NODE
-	return vm.eval(n.env, n.body)
+	m.body.typ = SXP_NODE
+	return vm.eval(m.env, m.body)
 }

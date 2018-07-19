@@ -6,6 +6,7 @@ type Env interface {
 	SetNum(name string, num int32)
 	SetFun(name string, fun Fun)
 	All() map[string]Node
+	Copy() Env
 }
 
 type env struct {
@@ -25,7 +26,7 @@ func NewSubEnvironment(parent Env) Env {
 func (e *env) Get(name string) Node {
 	val, ok := e.pool[name]
 	if ok {
-		return val
+		return val.Copy()
 	}
 	if e.parent != nil {
 		return e.parent.Get(name)
@@ -34,7 +35,7 @@ func (e *env) Get(name string) Node {
 }
 
 func (e *env) Set(name string, val Node) {
-	e.pool[name] = val
+	e.pool[name] = val.Copy()
 }
 
 func (e *env) SetNum(name string, num int32) {
@@ -47,4 +48,13 @@ func (e *env) SetFun(name string, fun Fun) {
 
 func (e *env) All() map[string]Node {
 	return e.pool
+}
+
+func (e *env) Copy() Env {
+	pool := map[string]Node{}
+	f := &env{e.parent, pool}
+	for k, v := range e.pool {
+		f.pool[k] = v.Copy()
+	}
+	return f
 }

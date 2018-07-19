@@ -7,28 +7,35 @@ import (
 	"strings"
 )
 
+// TODO: Assertion object has to be global. and provide a stak trace.
 // TODO: Floating point numbers statt integer?
 // TODO: Boolean type.
-// TODO: List primitives.
-// TODO: Erzeugt die Funktion in einem separaten environment und damit
-//       ist die Funktion nicht woanders zugänglich. LÖSUNG: def global,
-//       var lokal.
 // TODO: do primitive?
 // TODO: cond primitive?
 // TODO: dedicated node to return success.
 
 func main() {
 
-	reader := bufio.NewReader(os.Stdin)
+	rd := bufio.NewReader(os.Stdin)
 	vm := NewVM()
+	vm.Load("lib/prelude")
+
+	args := os.Args[1:]
+
+	// Load additional files.
+	if len(args) > 0 {
+		for _, arg := range args {
+			vm.Load(arg)
+		}
+	}
 
 	for {
 		fmt.Print("splis> ")
 
-		e, _ := reader.ReadString('\n')
+		e, _ := rd.ReadString('\n')
 		e = strings.TrimSpace(e)
 
-		if e == "exit" {
+		if e == ":exit" {
 			break
 		}
 
@@ -42,26 +49,4 @@ func main() {
 			fmt.Println(s)
 		}
 	}
-
-	// if len(os.Args) != 2 {
-	// 	panic("Please specify a file.")
-	// }
-
-	// f := os.Args[1]
-	// buf, err := ioutil.ReadFile(f)
-
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// e := string(buf)
-	// l := NewLexer(e)
-	// p := NewParser(l)
-	// ns := p.Parse()
-	// vm := NewVM()
-	// for _, n := range ns {
-	// 	r := vm.Eval(n)
-	// 	s := printAst(r)
-	// 	fmt.Println(s)
-	// }
 }

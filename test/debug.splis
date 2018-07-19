@@ -1,0 +1,6 @@
+(def {len} (lambda {l} {
+  if (== l {})
+    {0}
+    {+ 1 (len (tail l))}}))
+    
+(len {a})
