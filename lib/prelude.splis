@@ -40,13 +40,24 @@
 
 /**
  * Returns true iff the list l is empty.
+ *
+ * @param l  A Q-List.
+ * @returns  True if and only if the list is empty.
  */
 (fun {nil? l} {== l nil})
 
 /**
+ * Returns the first element of a list and evaluates it.
+ *
+ * @param l  A Q-List.
+ * @returns  The first element evaluated.
+ */
+(fun {fst l} {eval (head l)})
+
+/**
  * Returns the length of the list l. Requires time proportional to O(n). 
  *
- * @param l  A list.
+ * @param l  A Q-List.
  * @returns  The number of elements in list l.
  */
 (fun {len l} {
@@ -57,7 +68,7 @@
 /**
  * Reverses the list l.
  *
- * @param l  A list.
+ * @param l  A Q-List.
  * @returns  New list containing the elements of list l in reversed order.
  */
 (fun {rev l} {
@@ -70,10 +81,10 @@
  * of the evaluation results in the same order as the arguments in l.
  *
  * @param f  Unary function.
- * @param l  List of elements applicable to f.
+ * @param l  Q-List of elements applicable to f.
  * @returns  New list containing the evaluation results of each element.
  */     
 (fun {map f l} {
   if (nil? l)
     {nil}
-    {join (f (head l)) (map f (tail l))}})
+    {join (list (f (fst l))) (map f (tail l))}})
