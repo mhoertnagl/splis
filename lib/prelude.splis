@@ -2,8 +2,8 @@
  * Atomic values of truth. The mnemonics true and false are nothing but the
  * numeric values 1 and 0 respectively.
  */
-(def {true} 1)
-(def {false} 0)
+// (def {true} 1)
+// (def {false} 0)
 
 /**
  * The empty list.
@@ -26,7 +26,7 @@
  * Defines a new local environment. Variable bindings inside this scope Will not
  * be accessible outhside the let expression.
  *
- * @param b  @-Expression of the body to be evaluated inside the new local
+ * @param b  Q-Expression of the body to be evaluated inside the new local
  *           environment.
  */
 (fun {let b} {lambda {} b})
@@ -39,10 +39,10 @@
 (fun {import m} {execute (load m)})
 
 /**
- * Returns true iff the list l is empty.
+ * Returns true if and only if the list l is empty.
  *
  * @param l  A Q-List.
- * @returns  True if and only if the list is empty.
+ * @returns  True iff the list is empty.
  */
 (fun {nil? l} {== l nil})
 
@@ -53,6 +53,15 @@
  * @returns  The first element evaluated.
  */
 (fun {fst l} {eval (head l)})
+
+(fun {snd l} {eval (head (tail l))})
+
+(fun {case cs} {
+  if (nil? cs)
+    {nil}
+    {if (fst (fst cs))
+      {snd (fst cs)}
+      {case (tail cs)}}})
 
 /**
  * Returns the length of the list l. Requires time proportional to O(n). 

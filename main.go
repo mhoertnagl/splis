@@ -7,11 +7,12 @@ import (
 	"strings"
 )
 
-// TODO: Assertion object has to be global. and provide a stak trace.
-// TODO: Floating point numbers statt integer?
-// TODO: Boolean type.
 // TODO: do primitive?
 // TODO: cond primitive?
+// TODO: | cs list processing
+// TODO: let primitive
+// TODO: Assertion object has to be global. and provide a stak trace.
+// TODO: Boolean type.
 // TODO: dedicated node to return success.
 
 func main() {

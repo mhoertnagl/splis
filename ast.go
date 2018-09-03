@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
 )
 
 type NodeType int
@@ -64,14 +63,14 @@ func (n *errNode) Copy() Node {
 }
 
 type numNode struct {
-	val int32
+	val float64
 }
 
 func NewNumNodeFromString(s string) *numNode {
 	return NewNumNode(parseNumber(s))
 }
 
-func NewNumNode(n int32) *numNode {
+func NewNumNode(n float64) *numNode {
 	return &numNode{n}
 }
 
@@ -84,16 +83,17 @@ func (n *numNode) Copy() Node {
 	return NewNumNode(n.val)
 }
 
-func parseNumber(s string) int32 {
-	var n int64
-	if strings.HasPrefix(s, "0b") {
-		n, _ = strconv.ParseInt(s[2:], 2, 32)
-	} else if strings.HasPrefix(s, "0x") {
-		n, _ = strconv.ParseInt(s[2:], 16, 32)
-	} else {
-		n, _ = strconv.ParseInt(s, 10, 32)
-	}
-	return int32(n)
+func parseNumber(s string) float64 {
+	// var n float64
+	// if strings.HasPrefix(s, "0b") {
+	// 	n, _ = strconv.ParseInt(s[2:], 2, 32)
+	// } else if strings.HasPrefix(s, "0x") {
+	// 	n, _ = strconv.ParseInt(s[2:], 16, 32)
+	// } else {
+	// 	n, _ = strconv.ParseInt(s, 10, 32)
+	// }
+	n, _ := strconv.ParseFloat(s, 64)
+	return float64(n)
 }
 
 type strNode struct {

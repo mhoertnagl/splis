@@ -2,7 +2,7 @@ package main
 
 func (vm *vm) evalAdd(e Env, as []Node) Node {
 	t := NewAssertion()
-	var sum int32
+	var sum float64
 	for i := 0; i < len(as); i++ {
 		if t.AssertType(as[i], NUM_NODE, "Argument of +") {
 			return t.Error()
@@ -15,7 +15,7 @@ func (vm *vm) evalAdd(e Env, as []Node) Node {
 
 func (vm *vm) evalSub(e Env, as []Node) Node {
 	t := NewAssertion()
-	var diff int32
+	var diff float64
 	if len(as) == 1 {
 		if t.AssertType(as[0], NUM_NODE, "Argument of -") {
 			return t.Error()
@@ -42,7 +42,7 @@ func (vm *vm) evalSub(e Env, as []Node) Node {
 
 func (vm *vm) evalMul(e Env, as []Node) Node {
 	t := NewAssertion()
-	var prod int32 = 1
+	var prod float64 = 1
 	for i := 0; i < len(as); i++ {
 		if t.AssertType(as[i], NUM_NODE, "Argument of *") {
 			return t.Error()
@@ -55,7 +55,7 @@ func (vm *vm) evalMul(e Env, as []Node) Node {
 
 func (vm *vm) evalDiv(e Env, as []Node) Node {
 	t := NewAssertion()
-	var div int32 = 1
+	var div float64 = 1
 	if len(as) == 1 {
 		if t.AssertType(as[0], NUM_NODE, "Argument of /") {
 			return t.Error()

@@ -10,7 +10,7 @@ func printAst(n Node) string {
 	case *errNode:
 		return fmt.Sprintf("Error: %s\n", v.msg)
 	case *numNode:
-		return fmt.Sprintf("%d", v.val)
+		return fmt.Sprintf("%g", v.val)
 	case *strNode:
 		return fmt.Sprintf("\"%s\"", v.str)
 	case *symNode:

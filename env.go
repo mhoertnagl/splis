@@ -3,7 +3,7 @@ package main
 type Env interface {
 	Get(name string) Node
 	Set(name string, val Node)
-	SetNum(name string, num int32)
+	SetNum(name string, num float64)
 	SetFun(name string, fun Fun)
 	All() map[string]Node
 	Copy() Env
@@ -38,7 +38,7 @@ func (e *env) Set(name string, val Node) {
 	e.pool[name] = val.Copy()
 }
 
-func (e *env) SetNum(name string, num int32) {
+func (e *env) SetNum(name string, num float64) {
 	e.Set(name, &numNode{num})
 }
 

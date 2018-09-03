@@ -81,7 +81,7 @@ func TestEvalDiv0(t *testing.T) {
 }
 
 func TestEvalDiv1(t *testing.T) {
-	assertEvalEqual(t, "(/ 5)", "0")
+	assertEvalEqual(t, "(/ 5)", "0.2")
 }
 
 func TestEvalDiv2(t *testing.T) {

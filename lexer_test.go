@@ -21,17 +21,29 @@ func TestLexNum0123456789(t *testing.T) {
 	assertLex(t, l.Next(), NewToken(EOF, "", NewPos(1, 1)))
 }
 
-func TestLexNumBin(t *testing.T) {
-	l := NewLexer("0b1001")
-	assertLex(t, l.Next(), NewToken(NUM, "0b1001", NewPos(1, 1)))
+func TestLexFloat0(t *testing.T) {
+	l := NewLexer("0.")
+	assertLex(t, l.Next(), NewToken(NUM, "0.", NewPos(1, 1)))
 	assertLex(t, l.Next(), NewToken(EOF, "", NewPos(1, 1)))
 }
 
-func TestLexNumHex(t *testing.T) {
-	l := NewLexer("0x0123456789ABCDEF")
-	assertLex(t, l.Next(), NewToken(NUM, "0x0123456789ABCDEF", NewPos(1, 1)))
+func TestLexFloat1(t *testing.T) {
+	l := NewLexer("0.0123456789")
+	assertLex(t, l.Next(), NewToken(NUM, "0.0123456789", NewPos(1, 1)))
 	assertLex(t, l.Next(), NewToken(EOF, "", NewPos(1, 1)))
 }
+
+// func TestLexNumBin(t *testing.T) {
+// 	l := NewLexer("0b1001")
+// 	assertLex(t, l.Next(), NewToken(NUM, "0b1001", NewPos(1, 1)))
+// 	assertLex(t, l.Next(), NewToken(EOF, "", NewPos(1, 1)))
+// }
+//
+// func TestLexNumHex(t *testing.T) {
+// 	l := NewLexer("0x0123456789ABCDEF")
+// 	assertLex(t, l.Next(), NewToken(NUM, "0x0123456789ABCDEF", NewPos(1, 1)))
+// 	assertLex(t, l.Next(), NewToken(EOF, "", NewPos(1, 1)))
+// }
 
 func TestLexEmptyString(t *testing.T) {
 	l := NewLexer("\"\"")

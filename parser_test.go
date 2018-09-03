@@ -20,19 +20,33 @@ func TestParseNum(t *testing.T) {
 	assertNum(t, r[0], 0)
 }
 
-func TestParseBinNum(t *testing.T) {
-	l := NewLexer("0b101")
+func TestParseNum2(t *testing.T) {
+	l := NewLexer("0.")
 	p := NewParser(l)
 	r := p.Parse()
-	assertNum(t, r[0], 5)
+	assertNum(t, r[0], 0)
 }
 
-func TestParseHexNum(t *testing.T) {
-	l := NewLexer("0xABC")
+func TestParseNum3(t *testing.T) {
+	l := NewLexer("0.0123456789")
 	p := NewParser(l)
 	r := p.Parse()
-	assertNum(t, r[0], 2748)
+	assertNum(t, r[0], 0.0123456789)
 }
+
+// func TestParseBinNum(t *testing.T) {
+// 	l := NewLexer("0b101")
+// 	p := NewParser(l)
+// 	r := p.Parse()
+// 	assertNum(t, r[0], 5)
+// }
+//
+// func TestParseHexNum(t *testing.T) {
+// 	l := NewLexer("0xABC")
+// 	p := NewParser(l)
+// 	r := p.Parse()
+// 	assertNum(t, r[0], 2748)
+// }
 
 func TestParseEmptyString(t *testing.T) {
 	l := NewLexer("\"\"")
@@ -160,7 +174,7 @@ func assertErr(t *testing.T, r Node, m string) {
 	}
 }
 
-func assertNum(t *testing.T, r Node, n int32) {
+func assertNum(t *testing.T, r Node, n float64) {
 	rr, ok := r.(*numNode)
 	if !ok {
 		t.Errorf("Expected type [NumNode] but got type [%v]", rr)

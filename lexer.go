@@ -163,20 +163,26 @@ func (l *lexer) skipMultiLineComment(start string, end string) Token {
 	return l.Next()
 }
 
-// nextNum accepts numbers of the following patterns:
-//  o \d+
-//  o 0b[01]+
-//  o 0x[0-9A-F]+
+// nextNum accepts numbers of the pattern \d+(\.\d*)? .
 // The returned token however does not contain the converted numeric value but
 // the scanned textual representation of the number.
 func (l *lexer) nextNum() Token {
-	if l.test("0b") {
-		l.expect("0b")
-		l.readWhile(isBin)
-	} else if l.test("0x") {
-		l.expect("0x")
-		l.readWhile(isHex)
-	} else {
+	// if l.test("0b") {
+	// 	l.expect("0b")
+	// 	l.readWhile(isBin)
+	// } else if l.test("0x") {
+	// 	l.expect("0x")
+	// 	l.readWhile(isHex)
+	// } else {
+	// 	l.readWhile(isDec)
+	// 	if l.test(".") {
+	// 		l.read()
+	// 		l.readWhile(isDec)
+	// 	}
+	// }
+	l.readWhile(isDec)
+	if l.test(".") {
+		l.read()
 		l.readWhile(isDec)
 	}
 	return l.token(NUM)

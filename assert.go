@@ -28,7 +28,7 @@ func (a *assertion) AssertIntEqual(x int, y int, xName string, yName string) boo
 	return a.Failed()
 }
 
-func (a *assertion) AssertDivisble(x int32) bool {
+func (a *assertion) AssertDivisble(x float64) bool {
 	if a.ok && x == 0 {
 		msg := fmt.Sprintf("Cannot divide by 0.")
 		a.ok = false
